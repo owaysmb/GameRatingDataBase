@@ -130,7 +130,7 @@ function ShowItems(){
                  <DehazeRoundedIcon onClick={onClick} sx={{color:"white",backgroundColor:"transparent",fontSize:"30px",cursor:"pointer"}}/>
                  <img src={reactLogo} alt="logo" style={{cursor:"pointer"}} onClick={()=>navigate("/")} /> 
                   <input type="text" placeholder="  Search.." style={{width:"400px" , backgroundColor:"black",borderRadius:"40px",color:"white"}}/>
-                <PersonOutlinedIcon fontSize="large" sx={{backgroundColor:"transparent",color:"white",cursor:"pointer"}}/>
+                <PersonOutlinedIcon fontSize="large" sx={{backgroundColor:"transparent",color:"white",cursor:"pointer"}} onClick={()=>navigate("/login")}/>
             </div>
              {visibleItems  && <ShowCategoriesAfterClick/>} 
         </div>  

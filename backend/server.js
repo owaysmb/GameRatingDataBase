@@ -2,14 +2,17 @@ import express from "express"
 import fetch from "node-fetch"
 import cors from "cors"
 import dotenv from "dotenv"
+import routers from "../backend/routes/routes.js"
+import connectDB from "./config/db.js";
+
 
 dotenv.config();
 const app = express();
+app.use(express.json());
 app.use(cors());
+app.use("/", routers);
+connectDB(app.listen(3000));
 
-app.listen(3000, () => {
-  console.log("Backend running on http://localhost:3000");
-});
 let accessToken = null;
 
 async function getAcessToken() {
@@ -266,4 +269,5 @@ if(game.screenshots?.length){
     res.status(500).json({ error: "Failed to fetch game" });
   }
 });
+
 

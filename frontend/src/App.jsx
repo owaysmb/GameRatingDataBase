@@ -10,6 +10,9 @@ import { TrendingGames } from './Components/HomePage/TrendingGames';
 import { UpcomingGames } from './Components/HomePage/UpcomingGames';
 import { RecentlyReleasedGames } from './Components/HomePage/RecentlyReleasedGames';
 import { Loading } from './Components/Loading';
+import { Login } from './Components/LoginPage/Login';
+import { Signup } from './Components/LoginPage/Signup';
+import { ProfilePage } from './Components/Profile/ProfilePage';
 function App() {
 
   return (
@@ -30,8 +33,10 @@ function App() {
                 </>
             }>
             </Route>
-
+            <Route path='/login' element={<Login/>}/>
+            <Route path='/signup' element={<Signup/>}/>
             <Route path="/game/:id" element={<GameDetails />} /> {/* route this Component whenever the game:id is shown */}
+            <Route path='/profile' element={<ProfilePage/>} />
           </Routes>
           
             
