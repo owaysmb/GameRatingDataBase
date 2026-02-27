@@ -271,3 +271,31 @@ if(game.screenshots?.length){
 });
 
 
+app.get("/search/:name", async (req, res) => {
+  const { name } = req.params;
+
+  try {
+    const response = await fetch("https://api.igdb.com/v4/games", {
+      method: "POST",
+      headers: {
+        "Client-ID": process.env.TWITCH_CLIENT_ID,
+        "Authorization": `Bearer ${accessToken}`,
+        "Content-Type": "text/plain",
+      },
+      body: `
+        search "${name}";
+        fields   id,name,cover.url;   
+        limit 1;
+      `,
+    });
+
+    const data = await response.json();
+    res.json(data);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch game" });
+  }
+});
+
+

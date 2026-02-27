@@ -8,8 +8,11 @@ export function Login() {
         const res = await login(data)
         console.log(res)
         if (res.message === "Login successful") {
+            localStorage.setItem("user", JSON.stringify(res.user));
+            localStorage.setItem("token", res.token);
             navigate("/profile")
         }
+        window.location.reload();
     }
 
     

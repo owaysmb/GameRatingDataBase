@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react"
+import { useContext } from "react";
 import reactLogo from '../../assets/react.svg'
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../../context/AuthContext";
 // ICONS
 import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
 import DehazeRoundedIcon from '@mui/icons-material/DehazeRounded';
@@ -9,6 +11,9 @@ export function NavbarButton(){
     const [clicked,setClicked] = useState(false)
     const [itemsToShow, setItemsToShow] = useState(0)
     const [visibleItems,setVisibleItems] = useState(false)
+    const [search , setSearch] = useState("")
+    const navigate = useNavigate();
+    const { user, logout } = useContext(AuthContext);
     const Items = [
         {label:"New Releases",color:"white",bgColor:"#02010a",textColor: "#fff",links:["1","2","3"]},
         {label:"Top Rated",color:"white",bgColor:"#00002b",textColor: "#fff",links:["1","2","3"]},
@@ -118,8 +123,57 @@ function ShowItems(){
     </div>
   );
     }
+    
 
-   const navigate = useNavigate();
+    const handleSearch = async (e)=>{
+        e.preventDefault();
+        const res = await fetch(`http://localhost:3000/search/${search}`);
+        const data = await res.json();
+
+        if (data.length > 0) {
+            navigate(`/game/${data[0].id}`);
+            setSearch("")
+        }else{
+            console.log("game id not found ")
+            return <h1>No such a game with this name</h1>
+        }
+        
+    }
+
+    const handleLogin = ()=>{
+        if(!user){
+            navigate("/login")
+        }else{
+            navigate("/profile")
+        }
+        
+    }
+    
+    const handleLogout = () => {
+        logout()
+        navigate("/login")
+    }
+    function ProfilePictureNavbar() {
+
+        if(!user){
+            return(
+                <>
+                <PersonOutlinedIcon fontSize="large" sx={{backgroundColor:"transparent",color:"white",cursor:"pointer"}} onClick={handleLogin}/>
+                </>
+            )
+        }else{
+            return(
+                <>
+                {/* {navigate("/profile")} */}
+                <div style={{display:"flex",alignContent:"center"}}>
+                    <PersonOutlinedIcon fontSize="large" sx={{backgroundColor:"transparent",color:"green",cursor:"pointer"}}  onClick={handleLogin}/>
+                    <button style={{backgroundColor:"lightblue",borderRadius:"10px",cursor:"pointer"}} onClick={handleLogout} >Logout</button>
+                </div>
+                </>
+            )
+            
+        }
+    }
    
     return(
         <>
@@ -129,8 +183,18 @@ function ShowItems(){
             <div style={{display: "flex",justifyContent: "space-between",width: "100%",}}> 
                  <DehazeRoundedIcon onClick={onClick} sx={{color:"white",backgroundColor:"transparent",fontSize:"30px",cursor:"pointer"}}/>
                  <img src={reactLogo} alt="logo" style={{cursor:"pointer"}} onClick={()=>navigate("/")} /> 
-                  <input type="text" placeholder="  Search.." style={{width:"400px" , backgroundColor:"black",borderRadius:"40px",color:"white"}}/>
-                <PersonOutlinedIcon fontSize="large" sx={{backgroundColor:"transparent",color:"white",cursor:"pointer"}} onClick={()=>navigate("/login")}/>
+                 <form onSubmit={handleSearch}>
+                   <input 
+                   type="text" 
+                   placeholder="  Search.." 
+                   style={{width:"400px" , backgroundColor:"black",borderRadius:"40px",color:"white",height:"30px"}}
+                   onChange={(e)=>setSearch(e.target.value)}
+                   value={search}
+                   /> 
+                 </form>
+                  
+                {/* <PersonOutlinedIcon fontSize="large" sx={{backgroundColor:"transparent",color:"white",cursor:"pointer"}} onClick={CheckLogin}/> */}
+                <ProfilePictureNavbar/>
             </div>
              {visibleItems  && <ShowCategoriesAfterClick/>} 
         </div>  
