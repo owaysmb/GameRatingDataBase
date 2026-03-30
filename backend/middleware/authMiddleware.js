@@ -11,7 +11,7 @@ export function AuthMiddleware(req,res,next) {
 
     try{
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-        req.user = decoded;
+        req.user = { id: String(decoded.id) };
         next();
     }catch{
         return res.status(403).json({ message: "Invalid token" });

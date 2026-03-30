@@ -11,13 +11,13 @@ export function TopRated() {
     const [Loading,setLoading] = useState([]);
 
       useEffect(() => {
-    fetch("http://localhost:3000/api/top-rated")
-      .then(res => res.json())
-      .then(data => {
-        SetTopRatedGames(data);
-        setLoading(false);
-        console.log(data)
-      });
+        fetch("http://localhost:3000/api/top-rated")
+        .then(res => res.json())
+        .then(data => {
+            SetTopRatedGames(data);
+            setLoading(false);
+            console.log(data)
+        });
   }, []);
 
     function ShowTopRated() {

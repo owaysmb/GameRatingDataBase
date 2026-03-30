@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { ProfileCover } from "./ProfileCover";
 import {ProfileStats} from "./ProfileStats"
 import { ProfileReviews } from "./ProfileReviews";
+import {ProfileFavorite} from "../Profile/ProfileFavorite"
 export function ProfilePage() {
     const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate()
@@ -20,7 +21,11 @@ export function ProfilePage() {
             <hr />
             <ProfileStats/>
             <br />
+            <ProfileFavorite/>
+            <br />
             <ProfileReviews/>
+            
+            
         </div>
     )
 }

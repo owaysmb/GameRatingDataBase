@@ -2,6 +2,7 @@ import { SignupForm } from "./SignupForm";
 import { useNavigate } from "react-router-dom";
 
 export function LoginForm({onSubmit}) {
+    const token = localStorage.getItem("token")
     const onFormSubmit = (e) => {
     e.preventDefault();
     
@@ -11,7 +12,7 @@ export function LoginForm({onSubmit}) {
     });
   };
     const navigate = useNavigate();
-
+    console.log("Generated token:", token);
     return(
         <>
             {/* the entire form for login and signup */}

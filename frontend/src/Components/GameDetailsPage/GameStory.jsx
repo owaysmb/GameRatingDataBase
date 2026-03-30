@@ -1,6 +1,27 @@
-
+import { useState } from "react"
+import { AddToListModal } from "../AddToListModal"
 
 export function GameStory({game}) {
+    const [open,Setopen] = useState(false)
+    function ShowAddTolist() {  
+        return(
+            <>
+                <div onClick={()=>Setopen(true)} style={{
+                            width:"200px",
+                            height:"50px", 
+                            backgroundColor:"rgba(255,255,255,0.1)", 
+                            borderRadius:"10px", 
+                            display:"flex", 
+                            justifyContent:"center", 
+                            alignItems:"center",
+                            cursor:"pointer",
+                            color:"white"
+                        }}>Add To List</div>
+
+                 {open && <AddToListModal close={() => Setopen(false)} />}
+            </>
+        )
+    }
 
     return(
         <>
@@ -11,8 +32,20 @@ export function GameStory({game}) {
                 <p style={{fontSize:"20px", marginTop:"20px",width:"1500px"}}>{game.summary ? game.summary : "Summary not available for this game."}</p>
 
                 <div style={{display:"flex",flexDirection:"column",gap:"40px"}}>
-                    <div style={{width:"200px", height:"50px", backgroundColor:"rgba(255,255,255,0.1)", borderRadius:"10px", display:"flex", justifyContent:"center", alignItems:"center"}}>Add To List</div>
-                    <div style={{width:"200px", height:"50px", backgroundColor:"rgba(255,255,255,0.1)", borderRadius:"10px", display:"flex", justifyContent:"center", alignItems:"center"}}>Review</div>
+
+                    <div> <ShowAddTolist/></div>
+
+                    <div 
+                        style={{
+                            width:"200px", 
+                            height:"50px", backgroundColor:"rgba(255,255,255,0.1)", 
+                            borderRadius:"10px", 
+                            display:"flex", 
+                            justifyContent:"center", 
+                            alignItems:"center",
+                            cursor:"pointer"
+                            }}>Review
+                        </div>
                 </div>
 
             </div>

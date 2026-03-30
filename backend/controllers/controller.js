@@ -1,8 +1,14 @@
-import userSchema from "../models/User.js"
+
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken";
-import {AuthMiddleware} from "../middleware/authMiddleware.js"
 
+
+// users Model imports 
+import userSchema from "../models/User.js"
+import ReviewsSchema from "../models/Reviews.js";
+import RatingsSchema from "../models/Ratings.js";
+import ListsSchema from "../models/Lists.js";
+import FavoriteSchema from "../models/Favorite.js"
 
 export const login = async (req,res)=>{
     try {
@@ -23,7 +29,7 @@ export const login = async (req,res)=>{
         const token = jwt.sign( 
             { id: user._id },
             process.env.ACCESS_TOKEN_SECRET,
-            { expiresIn: "7d" })
+            { expiresIn: "30d" })
         
         res.json({ message: "Login successful" ,user,token})
 
@@ -58,3 +64,171 @@ export const signup = async (req, res) => {
     }
 }
 
+
+export const addToList = async (req,res) =>{
+    try{
+        if (!req.user?.id) {
+            return res.status(401).json({ message: "User not authenticated" });
+        }
+
+        const userId = req.user.id;
+        const gameId = req.params.id;
+        const { status } = req.body;
+
+  
+
+        const statusMap = {
+            "playing": "playing",
+            "played": "played",
+            "on-hold": "OnHold",
+            "want to play": "WantToPlay",
+            "dont want to play": "DontWantToPlay"
+        };
+        let list = await ListsSchema.findOne({ userId });
+        if (!list) {
+            list = new ListsSchema({ userId });
+        }
+        
+            const field = statusMap[status];
+            
+            if(field){
+                if (!list[field].includes(gameId)) {
+                    for (const check of Object.values(statusMap)) {
+                        
+                            if(list[check].includes(gameId)){
+                                let index = list[check].indexOf(gameId);
+                                if(index > -1){
+                                    list[check].splice(index,1);
+                                }
+                        }
+                        
+                    }
+                    list[field].push(gameId);
+                }
+            }
+        
+        
+        await list.save();
+        console.log("saved")
+        res.json({ message: "Game added to list", list });
+
+    }catch (err){
+        console.log(err)
+        res.status(500).json({ message: "Server error" })
+    }
+}
+
+export const addRating = async(req,res)=>{
+    try {
+        const userId = req.user.id
+        const rating = req.body.rating
+        const gameId = req.params.id
+        if (!req.user?.id) {
+            return res.status(401).json({ message: "User not authenticated" });
+        }
+
+        let userRating = await RatingsSchema.findOne({userId})
+
+        if(!userRating){
+            userRating  = new RatingsSchema({userId})
+        }
+
+        const RateRules = {
+            "one":"1",
+            "two":"2",
+            "three":"3",
+            "four":"4",
+            "five":"5"
+        }
+for (const key of Object.keys(userRating.rating.value)) {
+                const index = userRating.rating.value[key].indexOf(gameId);
+
+                if (index > -1) {
+                    userRating.rating.value[key].splice(index, 1);
+                }
+            }
+
+        for (const [k,v] of Object.entries(RateRules)) {
+
+            
+            if(v == rating.toString()){
+
+                if(userRating.rating.value[k].includes(gameId) ){ 
+                    let index = userRating.rating.value[k].indexOf(gameId);
+                    if(index > -1){
+                        userRating.rating.value[k].splice(index,1);
+                    }
+                }
+
+                userRating.rating.value[k].push(gameId)
+            }
+            
+        }
+        await userRating.save()
+
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+export const getStats = async (req,res)=>{
+    try {
+        if (!req.user?.id) {
+            return res.status(401).json({ message: "User not authenticated" });
+        }
+        let list = await ListsSchema.findOne({ userId:req.user.id });
+        res.json({
+            ...list.toObject(),
+            allgames: [
+                ...(list.played ?? []),
+                ...(list.playing ?? []),
+                ...(list.OnHold ?? []),
+                ...(list.WantToPlay ?? []),
+                ...(list.DontWantToPlay ?? []),
+            ]
+        });
+
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+export const addFavortie = async (req,res)=>{
+    const userId = req.user.id
+    const gameId = req.params.id
+    const favorite = req.body.favorite
+    if(!userId){
+        console.log("user not dound")
+    }
+    let userFavorite = await FavoriteSchema.findOne({userId})
+
+    if(!userFavorite){
+        userFavorite = new FavoriteSchema({userId})
+    }
+
+    if(favorite && !userFavorite.Favorites.includes(gameId)){
+        userFavorite.Favorites.push(gameId);
+    }else if(!favorite && userFavorite.Favorites.includes(gameId)){
+        let index = userFavorite.Favorites.indexOf(gameId);
+        if(index > -1){
+            userFavorite.Favorites.splice(index,1);
+        }
+    }
+     userFavorite.save();
+
+}
+
+export const GetFavorite = async (req,res)=>{
+    try {
+        if (!req.user?.id) {
+            return res.status(401).json({ message: "User not authenticated" });
+        }
+
+    let fav = await FavoriteSchema.findOne({userId:req.user.id});    
+    res.json(fav)
+    
+    } catch (err) {
+        console.log(err)
+    }
+    
+}

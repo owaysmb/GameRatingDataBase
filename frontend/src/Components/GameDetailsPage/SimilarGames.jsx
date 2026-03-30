@@ -34,9 +34,10 @@ export function SimilarGames({game}) {
             
                         <div style={{display:"flex",gap:"20px",overflow:"hidden"}} ref={MediaRef}>
                             {game.similarGames && (
-                            game.similarGames.map(s =>(
-                                <div onClick={() => navigate(`/game/${s.id}`)} style={{cursor:"pointer"}}>
+                            game.similarGames.map((s,i) =>(
+                                <div onClick={() => navigate(`/game/${s.id}`)} style={{cursor:"pointer"}}key={i}>
                                     <img
+                                        
                                         src={`https:${s.cover?.url?.replace("t_thumb", "t_cover_big")}`}
                                         alt={s.name}
                                         style={{borderRadius:"40px",width:"300px",height:"350px" }}

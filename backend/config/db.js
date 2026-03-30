@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 const connectDB = async (listen) => {
   try {
     await mongoose.connect(
-      "mongodb://127.0.0.1:27017/GRDB")
+      "mongodb+srv://Oways:oways123123@gameratingdatabase.axvwkfn.mongodb.net/GRDB?retryWrites=true&w=majority")
     .then(()=>
     {
       listen

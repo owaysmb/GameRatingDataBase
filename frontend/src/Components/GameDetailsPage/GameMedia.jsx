@@ -28,8 +28,9 @@ export function GameMedia({game}) {
 
             <div style={{display:"flex",gap:"20px",overflow:"hidden"}} ref={MediaRef}>
                 { (
-                game.screenshots?.map(s =>(
+                game.screenshots?.map((s,i) =>(
                      <img
+                     key={i}
                     src={`https:${s.url.replace("t_thumb", "t_screenshot_big")
                         .replace("t_screenshot_med", "t_screenshot_big")}`}
                     alt={game.name}

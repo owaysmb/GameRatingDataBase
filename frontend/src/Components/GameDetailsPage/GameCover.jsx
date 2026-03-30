@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 // mui icons and components
 import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
+import { MdOutlineFavorite } from "react-icons/md";
 
 // react icons
 import Rating from '@mui/material/Rating';
@@ -12,6 +13,63 @@ import { FaStar } from "react-icons/fa6";
 
 export function GameCoverAndTrailer({game}) {
 
+    const [starValue,SetstarValue] = useState(null);
+    const token = localStorage.getItem("token");
+    const {id} = useParams();
+    const [favorite,setFavorite] = useState(false);
+
+
+    const handlerating = async ()=>{
+        try {
+            const res = await fetch(`http://localhost:3000/game/${id}/rate`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ rating: starValue })
+            });
+            console.log("done rating by fetch")
+
+        } catch (err) {
+            console.error(err);
+        }
+        
+    }
+    useEffect(() => {
+        if (starValue > 0) {
+            handlerating(starValue);
+        }
+    }, [starValue]);
+
+    const handleFavorite = async ()=>{
+        const newFavorite = !favorite;
+        setFavorite(newFavorite );
+        localStorage.setItem(`favorite_${id}`, newFavorite);
+        try {
+            
+            await fetch(`http://localhost:3000/game/${id}/favorite`,{
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body:JSON.stringify({favorite:newFavorite})
+            })
+            
+        } catch (err) {
+            console.log(err);
+        }
+        
+    }
+    useEffect(() => {
+        const storedFavorite = localStorage.getItem(`favorite_${id}`);
+
+        if (storedFavorite !== null) {
+            setFavorite(storedFavorite === "true");
+        }
+    }, [id]);
+    
     return(
         <>  
         {/* main container */}
@@ -55,10 +113,29 @@ export function GameCoverAndTrailer({game}) {
                     </h3>
                 )}
             </div>
+            <div style={{display:"flex",gap:"30px",alignItems:"center"}}>
 
+                {
+                !favorite 
+                ? <MdOutlineFavorite size={32} style={{cursor:"pointer",color:"white"}} onClick={handleFavorite}/> 
+                : <MdOutlineFavorite size={32} style={{cursor:"pointer",color:"red"}} onClick={handleFavorite}/> 
+                }
+                
                     <Box style={{backgroundColor:"rgb(255, 255, 255)", padding:"20px", borderRadius:"20px", textAlign:"center"}}>
-                        <Rating name="customized-10"  max={5} style={{fontSize:"40px"}}/>
+                        <Rating 
+                        name="customized-10"  
+                        max={5} 
+                        style={{fontSize:"40px"}}
+                        value={starValue}
+                        onChange={(event,newValue)=>{
+                            SetstarValue(newValue);
+                            console.log("User selected:", newValue);
+                        }}
+                        
+                        />
                     </Box>
+            </div>
+                    
                 </div>
 
                 {/* game trailer  */}

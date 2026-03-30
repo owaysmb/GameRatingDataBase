@@ -14,28 +14,34 @@ app.use("/", routers);
 connectDB(app.listen(3000));
 
 let accessToken = null;
+let tokenExpiry = null;
 
-async function getAcessToken() {
-    const res = await fetch("https://id.twitch.tv/oauth2/token",
-        {
-            method:"POST",
-            headers:{
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body: new URLSearchParams({
-                client_id:process.env.TWITCH_CLIENT_ID,
-                client_secret: process.env.TWITCH_CLIENT_SECRET,
-                grant_type: "client_credentials",
-            }),
-        }
-    )
+async function getAccessToken() {
+
+    if (accessToken && tokenExpiry && Date.now() < tokenExpiry) {
+        return accessToken;
+    }
+
+    const res = await fetch("https://id.twitch.tv/oauth2/token", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+            client_id: process.env.TWITCH_CLIENT_ID,
+            client_secret: process.env.TWITCH_CLIENT_SECRET,
+            grant_type: "client_credentials",
+        }),
+    });
 
     const data = await res.json();
     accessToken = data.access_token;
+    tokenExpiry = Date.now() + (data.expires_in * 1000) - 60000; 
 
+    return accessToken;
 }
 
-await getAcessToken();
+await getAccessToken(); 
 
 app.get("/",(req,res)=>{
     console.log("TEST");
@@ -49,7 +55,7 @@ app.get("/api/top-rated",async (req ,res)=>{
             method:"POST",
             headers:{
                 "Client-ID": process.env.TWITCH_CLIENT_ID,
-                "Authorization": `Bearer ${accessToken}`,
+                "Authorization": `Bearer ${await getAccessToken()}`,
                 "Content-Type": "text/plain",
             },
             body:`
@@ -72,7 +78,7 @@ app.get("/api/Trending",async (req ,res)=>{
             method:"POST",
             headers:{
                 "Client-ID": process.env.TWITCH_CLIENT_ID,
-                "Authorization": `Bearer ${accessToken}`,
+                "Authorization": `Bearer ${await getAccessToken()}`,
                 "Content-Type": "text/plain",
             },
             body:`
@@ -101,7 +107,7 @@ app.get("/api/Upcoming",async (req ,res)=>{
             method:"POST",
             headers:{
                 "Client-ID": process.env.TWITCH_CLIENT_ID,
-                "Authorization": `Bearer ${accessToken}`,
+                "Authorization": `Bearer ${await getAccessToken()}`,
                 "Content-Type": "text/plain",
             },
             body:`
@@ -133,7 +139,7 @@ app.get("/api/Recently_released",async (req ,res)=>{
             method:"POST",
             headers:{
                 "Client-ID": process.env.TWITCH_CLIENT_ID,
-                "Authorization": `Bearer ${accessToken}`,
+                "Authorization": `Bearer ${await getAccessToken()}`,
                 "Content-Type": "text/plain",
             },
             body:`
@@ -153,18 +159,81 @@ app.get("/api/Recently_released",async (req ,res)=>{
     }
 });
 
+app.post("/batch/stats", async (req, res) => {
+    try {
+        const { ids } = req.body;
+        if (!ids?.length) return res.json([]);
 
+        const token = await getAccessToken();
+
+        const igdbRes = await fetch("https://api.igdb.com/v4/games", {
+            method: "POST",
+            headers: {
+                "Client-ID": process.env.TWITCH_CLIENT_ID,
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "text/plain",
+            },
+            body: `where id = (${ids.join(",")}); fields name, cover.url, rating; limit 50;`,
+        });
+
+        const games = await igdbRes.json();
+
+        const processed = games.map(g => ({
+            ...g,
+            cover: g.cover?.url
+                ? `https:${g.cover.url.replace("t_thumb", "t_cover_big")}`
+                : null,
+        }));
+
+        res.json(processed);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: "Failed" });
+    }
+});
+
+app.post("/batch/favorites",async (req,res)=>{
+  try {
+    const {ids} = req.body;
+
+    const token = await getAccessToken() 
+
+    const igdbRes = await fetch("https://api.igdb.com/v4/games", {
+            method: "POST",
+            headers: {
+                "Client-ID": process.env.TWITCH_CLIENT_ID,
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "text/plain",
+            },
+            body: `where id = (${ids.join(",")}); fields name, cover.url;`,
+        });
+
+    const favorites = await igdbRes.json();
+    
+    const processed = favorites.map(f => ({
+      ...f,
+      cover: f.cover?.url
+        ? `https:${f.cover.url.replace("t_thumb", "t_cover_big")}`
+        : null,
+    }))
+    res.json(processed);
+
+  } catch (err) {
+    console.log(err);
+  }
+})
 
 
 app.get("/game/:id", async (req, res) => {
   try {
+    
     const { id } = req.params;
 
     const igdbRes = await fetch("https://api.igdb.com/v4/games", {
       method: "POST",
       headers: {
         "Client-ID": process.env.TWITCH_CLIENT_ID,
-        "Authorization": `Bearer ${accessToken}`,
+        "Authorization": `Bearer ${await getAccessToken()}`,
         "Content-Type": "text/plain",
       },
       body: `
@@ -218,27 +287,24 @@ if(game.screenshots?.length){
     ))
 }
 
-  const ttbRes = await fetch("https://api.igdb.com/v4/time_to_beats",{
-  method:"POST",
-  headers: {
-    "Client-ID": process.env.TWITCH_CLIENT_ID,
-    "Authorization": `Bearer ${accessToken}`,
-    "Content-Type": "text/plain",
-  },
-  body: `
-    where game = ${id};
-    fields hastily, normally, completely;
-  `,
-  });
+const ttbRes = await fetch("https://api.igdb.com/v4/game_time_to_beats", {
+    method: "POST",
+    headers: {
+        "Client-ID": process.env.TWITCH_CLIENT_ID,
+        "Authorization": `Bearer ${await getAccessToken()}`,
+        "Content-Type": "text/plain",
+    },
+    body: `where game_id = ${id}; fields hastily, normally, completely;`,
+});
 
-  const ttb = ttbRes.length ? ttbRes[0] : null;
-  const timeToBeat = ttb
-  ? {
-      hastily: ttb.hastily ? Math.round(ttb.hastily / 3600) : null,
-      normally: ttb.normally ? Math.round(ttb.normally / 3600) : null,
-      completely: ttb.completely ? Math.round(ttb.completely / 3600) : null,
-    }
-  : null;
+const ttbData = await ttbRes.json();
+const ttb = ttbData[0];
+
+const timeToBeat = ttb ? {
+    hastily:    ttb.hastily    ? Math.round(ttb.hastily / 3600)    : null,
+    normally:   ttb.normally   ? Math.round(ttb.normally / 3600)   : null,
+    completely: ttb.completely ? Math.round(ttb.completely / 3600) : null,
+} : null;
 
   let similarGames = [];
     if(game.similar_games?.length){
@@ -246,7 +312,7 @@ if(game.screenshots?.length){
       method: "POST",
       headers: {
         "Client-ID": process.env.TWITCH_CLIENT_ID,
-        "Authorization": `Bearer ${accessToken}`,
+        "Authorization": `Bearer ${await getAccessToken()}`,
         "Content-Type": "text/plain",
       },
       body: `
@@ -279,7 +345,7 @@ app.get("/search/:name", async (req, res) => {
       method: "POST",
       headers: {
         "Client-ID": process.env.TWITCH_CLIENT_ID,
-        "Authorization": `Bearer ${accessToken}`,
+        "Authorization": `Bearer ${await getAccessToken()}`,
         "Content-Type": "text/plain",
       },
       body: `

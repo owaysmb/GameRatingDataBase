@@ -14,6 +14,7 @@ import { Login } from './Components/LoginPage/Login';
 import { Signup } from './Components/LoginPage/Signup';
 import { ProfilePage } from './Components/Profile/ProfilePage';
 import { AuthProvider } from "../context/AuthContext";
+import { ProfileStatsPage } from './Components/Profile/ProfileStatsPage/ProfileStatsPage';
 function App() {
 
   return (
@@ -23,7 +24,7 @@ function App() {
         <ScrollToTop/>
         
           <NavbarButton/>
-          {/* <Loading/> */}
+          <Loading/>
           <Routes>
             <Route path='/' element={
                 <>
@@ -39,7 +40,7 @@ function App() {
             <Route path='/signup' element={<Signup/>}/>
             <Route path="/game/:id" element={<GameDetails />} /> {/* route this Component whenever the game:id is shown */}
             <Route path='/profile' element={<ProfilePage/>} />
-            
+            <Route path='/profile/stats' element={<ProfileStatsPage/>}/>
           </Routes>
           
             

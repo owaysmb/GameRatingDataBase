@@ -9,12 +9,11 @@ const ReviewsSchema = new mongoose.Schema({
   ,gameId: {
     type: String,
     required: true,
-    unique: true
   },
   reviewText: {
     type: String,
     required: true,
   }
-});
+}, { timestamps: true });
 
-export default mongoose.model("Reviews", ReviewsSchema);
+export default mongoose.model("Review", ReviewsSchema);
