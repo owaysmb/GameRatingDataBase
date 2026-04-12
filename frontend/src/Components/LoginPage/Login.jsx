@@ -11,8 +11,9 @@ export function Login() {
             localStorage.setItem("user", JSON.stringify(res.user));
             localStorage.setItem("token", res.token);
             navigate("/profile")
+            window.location.reload();
         }
-        window.location.reload();
+        
     }
 
     

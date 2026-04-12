@@ -2,7 +2,7 @@
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken";
 
-
+import mongoose from "mongoose";
 // users Model imports 
 import userSchema from "../models/User.js"
 import ReviewsSchema from "../models/Reviews.js";
@@ -71,11 +71,14 @@ export const addToList = async (req,res) =>{
             return res.status(401).json({ message: "User not authenticated" });
         }
 
-        const userId = req.user.id;
+        const userId = new mongoose.Types.ObjectId(req.user.id);
         const gameId = req.params.id;
         const { status } = req.body;
 
-  
+        let list = await ListsSchema.findOne({ userId });
+        if (!list) {
+            list = new ListsSchema({ userId });
+        }
 
         const statusMap = {
             "playing": "playing",
@@ -84,11 +87,6 @@ export const addToList = async (req,res) =>{
             "want to play": "WantToPlay",
             "dont want to play": "DontWantToPlay"
         };
-        let list = await ListsSchema.findOne({ userId });
-        if (!list) {
-            list = new ListsSchema({ userId });
-        }
-        
             const field = statusMap[status];
             
             if(field){
@@ -120,7 +118,7 @@ export const addToList = async (req,res) =>{
 
 export const addRating = async(req,res)=>{
     try {
-        const userId = req.user.id
+        const userId = new mongoose.Types.ObjectId(req.user.id);
         const rating = req.body.rating
         const gameId = req.params.id
         if (!req.user?.id) {
@@ -171,12 +169,22 @@ for (const key of Object.keys(userRating.rating.value)) {
     }
 }
 
-export const getStats = async (req,res)=>{
+export const getStats = async (req, res) => {
     try {
         if (!req.user?.id) {
             return res.status(401).json({ message: "User not authenticated" });
         }
-        let list = await ListsSchema.findOne({ userId:req.user.id });
+
+        const userId = new mongoose.Types.ObjectId(req.user.id);
+        const list = await ListsSchema.findOne({ userId });
+
+        if (!list) {
+            return res.json({
+                played: [], playing: [], OnHold: [],
+                WantToPlay: [], DontWantToPlay: [], allgames: []
+            });
+        }
+
         res.json({
             ...list.toObject(),
             allgames: [
@@ -189,12 +197,13 @@ export const getStats = async (req,res)=>{
         });
 
     } catch (err) {
-        console.log(err)
+        console.log(err);
+        res.status(500).json({ message: "Server error" });
     }
 }
 
 export const addFavortie = async (req,res)=>{
-    const userId = req.user.id
+    const userId = new mongoose.Types.ObjectId(req.user.id);
     const gameId = req.params.id
     const favorite = req.body.favorite
     if(!userId){

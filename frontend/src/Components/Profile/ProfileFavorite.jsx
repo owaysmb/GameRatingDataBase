@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { useEffect } from 'react';
 import { useContext } from 'react';
 import { AuthContext } from "../../../context/AuthContext";
-
+import { useNavigate } from "react-router-dom";
 
 export function ProfileFavorite() {
     const token = localStorage.getItem("token");
     const [Fav,SetFav] = useState([])
     const [game, setGames] = useState([]);
     const { user, logout } = useContext(AuthContext);
+    const navigate = useNavigate()
 
     useEffect(()=>{
             const fetchFav = async ()=>{
@@ -27,7 +28,7 @@ export function ProfileFavorite() {
         
            useEffect(()=>{
             const fetchGames = async () => {
-                const res = await fetch("http://localhost:3000/batch/favorites", {
+                const res = await fetch("http://localhost:3000/games/batch", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -55,7 +56,7 @@ export function ProfileFavorite() {
             <div style={{display:"flex",gap:"20px",padding:"30px",backgroundColor:"#111",borderRadius:"20px",justifyContent:"space-around",overflow:"hidden"}}>
                     {game.map((g) => {
                     return (
-                        <div key={g.id} style={{display:"flex", flexDirection:"column", alignItems:"center", width:"150px"}}>
+                        <div key={g.id} style={{display:"flex", flexDirection:"column", alignItems:"center", width:"150px" ,cursor:"pointer"}} onClick={()=>{navigate(`/game/${g.id}`)}}>
                             { g.cover 
                             ? <img src={g.cover} alt={g.name} style={{width:"150px", height:"200px", objectFit:"cover", borderRadius:"8px"}} />
                             : <div style={{width:"150px", height:"200px", backgroundColor:"#333", borderRadius:"8px", display:"flex", alignItems:"center", justifyContent:"center", color:"#666"}}>No Image</div>

@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 
 
 export function StatsCard({game,stats}) {
-
+    const navigate = useNavigate()
 
 function findStats(gameId) {
     for (const [k, v] of Object.entries(stats)) {
@@ -15,7 +16,6 @@ function findStats(gameId) {
     }
     return <td>-</td>;
 }
-
 function progress(g) {
     const [counter,setCounter] = useState(0)
 
@@ -59,13 +59,13 @@ function progress(g) {
             {game.map((g, i) => (
                     <tr key={g.id} style={{ borderBottom:"1px solid #eee" }}>
                         <td>{i + 1}</td>
-                        <td>
+                        <td style={{padding:"10px"}}>
                             {g.cover
                                 ? <img src={g.cover} style={{ width:100, height:120, objectFit:"cover" }} />
                                 : <div style={{ width:40, height:55, background:"#eee" }} />
                             }
                         </td>
-                            <td style={{ fontWeight:500 }}>{g.name}</td>
+                            <td style={{ fontWeight:500 ,cursor: "pointer" ,padding:"10px"}} onClick={()=>{navigate(`/game/${g.id}`)}} >{g.name}</td>
                             <td style={{ textAlign:"center" }}> {g.rating ? Math.round(g.rating) : "-"}</td>
                             {findStats(g.id)}
                             <td>{progress(g)}</td>

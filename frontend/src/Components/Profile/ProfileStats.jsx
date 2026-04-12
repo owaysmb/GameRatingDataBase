@@ -9,7 +9,6 @@ export function ProfileStats() {
         const [stats,SetStats] = useState(0);
         const navigate = useNavigate()
 
-
         const tabIndex = {
             playing: 1,
             played: 2,
@@ -43,6 +42,9 @@ console.log(stats)
             cursor:"pointer"
         }
 
+
+        
+
     return(
         <>
             <h1 onClick={()=>navigate("/profile/stats")} style={{cursor:"pointer",width:"200px"}}>Statistics :</h1>
@@ -59,7 +61,7 @@ console.log(stats)
                 </div>
 
                 <div>
-                    <h1>Total Games :</h1>
+                    <h1>Total Games : {stats?.allgames?.length}</h1>
                     <h1>Total Hours Played :</h1>
                 </div>
                 

@@ -17,7 +17,7 @@ export function GameCoverAndTrailer({game}) {
     const token = localStorage.getItem("token");
     const {id} = useParams();
     const [favorite,setFavorite] = useState(false);
-
+    const [Fav,SetFav] = useState([])
 
     const handlerating = async ()=>{
         try {
@@ -42,33 +42,35 @@ export function GameCoverAndTrailer({game}) {
         }
     }, [starValue]);
 
-    const handleFavorite = async ()=>{
+    const handleFavorite = async () => {
         const newFavorite = !favorite;
-        setFavorite(newFavorite );
-        localStorage.setItem(`favorite_${id}`, newFavorite);
-        try {
-            
-            await fetch(`http://localhost:3000/game/${id}/favorite`,{
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
-                },
-                body:JSON.stringify({favorite:newFavorite})
-            })
-            
-        } catch (err) {
-            console.log(err);
-        }
-        
-    }
-    useEffect(() => {
-        const storedFavorite = localStorage.getItem(`favorite_${id}`);
+        setFavorite(newFavorite);
 
-        if (storedFavorite !== null) {
-            setFavorite(storedFavorite === "true");
-        }
-    }, [id]);
+        await fetch(`http://localhost:3000/game/${id}/favorite`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ favorite: newFavorite })
+        });
+    };
+
+    useEffect(() => {
+        const fetchFav = async () => {
+            const resFav = await fetch("http://localhost:3000/getfavorite", {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const FavData = await resFav.json();
+            const favList = FavData.Favorites ?? [];
+            SetFav(favList);
+
+            setFavorite(favList.includes(String(id)));
+        };
+        fetchFav();
+    }, [id]); 
+
+
     
     return(
         <>  
@@ -115,11 +117,11 @@ export function GameCoverAndTrailer({game}) {
             </div>
             <div style={{display:"flex",gap:"30px",alignItems:"center"}}>
 
-                {
-                !favorite 
-                ? <MdOutlineFavorite size={32} style={{cursor:"pointer",color:"white"}} onClick={handleFavorite}/> 
-                : <MdOutlineFavorite size={32} style={{cursor:"pointer",color:"red"}} onClick={handleFavorite}/> 
-                }
+                <MdOutlineFavorite 
+                    size={32} 
+                    onClick={handleFavorite}
+                    style={{ cursor:"pointer", color: favorite ? "red" : "white" }} 
+                />
                 
                     <Box style={{backgroundColor:"rgb(255, 255, 255)", padding:"20px", borderRadius:"20px", textAlign:"center"}}>
                         <Rating 

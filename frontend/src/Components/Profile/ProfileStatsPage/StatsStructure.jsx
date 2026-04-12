@@ -45,7 +45,7 @@ useEffect(() => {
             return;
         }
 
-        const res = await fetch("http://localhost:3000/batch/stats", {
+        const res = await fetch("http://localhost:3000/games/batch", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -68,14 +68,6 @@ console.log(game)
         <>{loading ? <Loading/> 
             :
             <div style={{color:"white"}}>
-
-            {/* <div style={{display:"flex",gap:"10px"}}>
-                <h2>#</h2>
-                <h2>Image</h2>
-                <h2>Name</h2>
-                <h2>Score</h2>
-
-            </div> */}
 
                 {game.length == 0 
                     ? <p>No Games Here</p>

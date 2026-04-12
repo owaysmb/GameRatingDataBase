@@ -41,7 +41,29 @@ async function getAccessToken() {
     return accessToken;
 }
 
-await getAccessToken(); 
+class IGDBService {
+    constructor(){
+        this.link = "https://api.igdb.com/v4/games";
+    }
+
+    async FetchRes(body){
+        const token = await getAccessToken();
+
+        const res = await fetch(this.link,{
+            method:"POST",
+            headers:{
+                "Client-ID": process.env.TWITCH_CLIENT_ID,
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "text/plain",
+            },
+            body:body
+        })
+        
+        return res.json();
+    }
+
+}
+
 
 app.get("/",(req,res)=>{
     console.log("TEST");
@@ -51,37 +73,27 @@ app.get("/",(req,res)=>{
 
 app.get("/api/top-rated",async (req ,res)=>{
     try{
-        const igdbRes = await fetch("https://api.igdb.com/v4/games",{
-            method:"POST",
-            headers:{
-                "Client-ID": process.env.TWITCH_CLIENT_ID,
-                "Authorization": `Bearer ${await getAccessToken()}`,
-                "Content-Type": "text/plain",
-            },
-            body:`
-                    fields name, cover.url, genres.name, rating, rating_count;
-                    where rating != null & rating_count >= 1200;
-                    sort rating desc;
-                    limit 10;
-                `,
-        });
-        const data = await igdbRes.json();
+        const TopRatedRes = new IGDBService()
+        const data = await TopRatedRes.FetchRes(`
+                        fields name, cover.url, genres.name, rating, rating_count;
+                        where rating != null & rating_count >= 1200;
+                        sort rating desc;
+                        limit 10;
+                    `)
         res.json(data)
     }catch (err){
         res.status(500).json({error:"IGDB Fetch Failed"});
     }
 });
-const threeMonthsAgo = Math.floor(Date.now() / 1000) - 60 * 60 * 24 * 90;
+
+
 app.get("/api/Trending",async (req ,res)=>{
     try{
-        const igdbRes = await fetch("https://api.igdb.com/v4/games",{
-            method:"POST",
-            headers:{
-                "Client-ID": process.env.TWITCH_CLIENT_ID,
-                "Authorization": `Bearer ${await getAccessToken()}`,
-                "Content-Type": "text/plain",
-            },
-            body:`
+
+        const threeMonthsAgo = Math.floor(Date.now() / 1000) - 60 * 60 * 24 * 90;
+
+        const igdb = new IGDBService();
+        const data = await igdb.FetchRes(`
                   fields 
                     name,
                     cover.url,
@@ -93,24 +105,17 @@ app.get("/api/Trending",async (req ,res)=>{
                   sort rating_count desc;
                   limit 20;
 
-                `,
-        });
-        const data = await igdbRes.json();
+                `);
         res.json(data)
+
     }catch (err){
         res.status(500).json({error:"IGDB Fetch Failed"});
     }
 });
 app.get("/api/Upcoming",async (req ,res)=>{
     try{
-        const igdbRes = await fetch("https://api.igdb.com/v4/games",{
-            method:"POST",
-            headers:{
-                "Client-ID": process.env.TWITCH_CLIENT_ID,
-                "Authorization": `Bearer ${await getAccessToken()}`,
-                "Content-Type": "text/plain",
-            },
-            body:`
+        const igdb = new IGDBService()
+        const data = await igdb.FetchRes(`
                   fields 
                   name,
                   cover.url,
@@ -120,11 +125,7 @@ app.get("/api/Upcoming",async (req ,res)=>{
                 where hypes != null & first_release_date > ${Math.floor(Date.now() / 1000)};
                 sort hypes desc;
                 limit 20;
-
-
-                `,
-        });
-        const data = await igdbRes.json();
+                `);
         res.json(data)
     }catch (err){
         res.status(500).json({error:"IGDB Fetch Failed"});
@@ -135,54 +136,66 @@ const last30Days = now - 60 * 60 * 24 * 30;
 
 app.get("/api/Recently_released",async (req ,res)=>{
     try{
-        const igdbRes = await fetch("https://api.igdb.com/v4/games",{
-            method:"POST",
-            headers:{
-                "Client-ID": process.env.TWITCH_CLIENT_ID,
-                "Authorization": `Bearer ${await getAccessToken()}`,
-                "Content-Type": "text/plain",
-            },
-            body:`
+        
+        const igdb = new IGDBService()
+
+        const data = await igdb.FetchRes(`
                   fields name, cover.url, genres.name, first_release_date;
                   where first_release_date < ${now}
                     & first_release_date > ${last30Days}
                     & cover != null;
                   sort first_release_date desc;
                   limit 20;
-
-                `,
-        });
-        const data = await igdbRes.json();
+                `);
         res.json(data)
     }catch (err){
         res.status(500).json({error:"IGDB Fetch Failed"});
     }
 });
 
-app.post("/batch/stats", async (req, res) => {
+
+app.post("/games/batch", async (req, res) => {
     try {
-        const { ids } = req.body;
+        const { ids, fields } = req.body;
         if (!ids?.length) return res.json([]);
 
-        const token = await getAccessToken();
+        const igdb = new IGDBService()
 
-        const igdbRes = await fetch("https://api.igdb.com/v4/games", {
+        const games = await igdb.FetchRes(`
+                where id = (${ids.join(",")});
+                fields ${fields ?? "name, cover.url, rating"};
+                limit 50;
+            `);
+
+        const ttbRes = await fetch("https://api.igdb.com/v4/game_time_to_beats", {
             method: "POST",
             headers: {
                 "Client-ID": process.env.TWITCH_CLIENT_ID,
-                "Authorization": `Bearer ${token}`,
+                "Authorization": `Bearer ${await getAccessToken()}`,
                 "Content-Type": "text/plain",
             },
-            body: `where id = (${ids.join(",")}); fields name, cover.url, rating; limit 50;`,
+            body: `where game_id = (${ids.join(",")}); fields game_id, hastily, normally, completely; limit 50;`,
         });
 
-        const games = await igdbRes.json();
+        const ttbData = await ttbRes.json();
+
+
+        const ttbMap = {};
+        for (let i = 0; i < ttbData.length; i++) {
+            const ttb = ttbData[i];
+            ttbMap[String(ttb.game_id)] = { 
+                hastily:    ttb.hastily    ? Math.round(ttb.hastily / 3600)    : null,
+                normally:   ttb.normally   ? Math.round(ttb.normally / 3600)   : null,
+                completely: ttb.completely ? Math.round(ttb.completely / 3600) : null,
+            };
+        }
 
         const processed = games.map(g => ({
             ...g,
             cover: g.cover?.url
                 ? `https:${g.cover.url.replace("t_thumb", "t_cover_big")}`
                 : null,
+            timeToBeat: ttbMap[String(g.id)] ?? null
         }));
 
         res.json(processed);
@@ -192,36 +205,7 @@ app.post("/batch/stats", async (req, res) => {
     }
 });
 
-app.post("/batch/favorites",async (req,res)=>{
-  try {
-    const {ids} = req.body;
 
-    const token = await getAccessToken() 
-
-    const igdbRes = await fetch("https://api.igdb.com/v4/games", {
-            method: "POST",
-            headers: {
-                "Client-ID": process.env.TWITCH_CLIENT_ID,
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "text/plain",
-            },
-            body: `where id = (${ids.join(",")}); fields name, cover.url;`,
-        });
-
-    const favorites = await igdbRes.json();
-    
-    const processed = favorites.map(f => ({
-      ...f,
-      cover: f.cover?.url
-        ? `https:${f.cover.url.replace("t_thumb", "t_cover_big")}`
-        : null,
-    }))
-    res.json(processed);
-
-  } catch (err) {
-    console.log(err);
-  }
-})
 
 
 app.get("/game/:id", async (req, res) => {
@@ -229,14 +213,9 @@ app.get("/game/:id", async (req, res) => {
     
     const { id } = req.params;
 
-    const igdbRes = await fetch("https://api.igdb.com/v4/games", {
-      method: "POST",
-      headers: {
-        "Client-ID": process.env.TWITCH_CLIENT_ID,
-        "Authorization": `Bearer ${await getAccessToken()}`,
-        "Content-Type": "text/plain",
-      },
-      body: `
+    const igdb = new IGDBService();
+
+    const [game] = await igdb.FetchRes(`
         where id = ${id};
         fields      name,
                     rating,
@@ -258,10 +237,7 @@ app.get("/game/:id", async (req, res) => {
                     involved_companies.publisher,
                     similar_games
 ;
-      `,
-    });
-
-    const [game] = await igdbRes.json();
+      `);
     if (!game) {
       return res.status(404).json({ error: "Game not found" });
     }
@@ -308,18 +284,11 @@ const timeToBeat = ttb ? {
 
   let similarGames = [];
     if(game.similar_games?.length){
-      const similarRes = await fetch("https://api.igdb.com/v4/games", {
-      method: "POST",
-      headers: {
-        "Client-ID": process.env.TWITCH_CLIENT_ID,
-        "Authorization": `Bearer ${await getAccessToken()}`,
-        "Content-Type": "text/plain",
-      },
-      body: `
+      const similarRes = new IGDBService()
+      similarGames = await similarRes.FetchRes(`
         where id = (${game.similar_games.slice(0, 6).join(",")});
         fields name, cover.url, rating;
-      `,});
-      similarGames = await similarRes.json();
+      `);
     }
 
     res.json({
@@ -341,21 +310,13 @@ app.get("/search/:name", async (req, res) => {
   const { name } = req.params;
 
   try {
-    const response = await fetch("https://api.igdb.com/v4/games", {
-      method: "POST",
-      headers: {
-        "Client-ID": process.env.TWITCH_CLIENT_ID,
-        "Authorization": `Bearer ${await getAccessToken()}`,
-        "Content-Type": "text/plain",
-      },
-      body: `
+    const response = new IGDBService();
+
+    const data = await response.FetchRes(`
         search "${name}";
         fields   id,name,cover.url;   
         limit 1;
-      `,
-    });
-
-    const data = await response.json();
+      `);
     res.json(data);
 
   } catch (error) {
