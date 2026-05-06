@@ -8,7 +8,7 @@ export function ProfileStats() {
         const token = localStorage.getItem("token");
         const [stats,SetStats] = useState(0);
         const navigate = useNavigate()
-
+        const [TotalHours , SetTotalHours] = useState(0);
         const tabIndex = {
             playing: 1,
             played: 2,
@@ -31,7 +31,24 @@ export function ProfileStats() {
                 }
             fetchStats();
         },[])
-console.log(stats)
+
+
+useEffect(()=>{
+     const handleGetProgress = async ()=>{
+        const GetProgress = await fetch("http://localhost:3000/getprogress",{
+            headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+        })
+        const data = await GetProgress.json();
+        SetTotalHours(data.UserProgress?.Progress.TotalHours)
+
+    }
+    handleGetProgress();
+},[])
+
+
         const statsStyle = {
             width:"300px",
             display:"flex",
@@ -62,7 +79,7 @@ console.log(stats)
 
                 <div>
                     <h1>Total Games : {stats?.allgames?.length}</h1>
-                    <h1>Total Hours Played :</h1>
+                    <h1>Total Hours Played : {TotalHours}</h1>
                 </div>
                 
             </div>

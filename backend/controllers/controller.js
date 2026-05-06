@@ -9,7 +9,8 @@ import ReviewsSchema from "../models/Reviews.js";
 import RatingsSchema from "../models/Ratings.js";
 import ListsSchema from "../models/Lists.js";
 import FavoriteSchema from "../models/Favorite.js"
-
+import ProgressSchema from "../models/Progress.js";
+import Progress from "../models/Progress.js";
 export const login = async (req,res)=>{
     try {
         const { email, password } = req.body
@@ -241,3 +242,74 @@ export const GetFavorite = async (req,res)=>{
     }
     
 }
+
+export const GetRating = async (req,res)=>{
+    try {
+        const gameId = req.params.id;
+
+        if (!req.user?.id) {
+            return res.status(401).json({ message: "User not authenticated" });
+        }
+
+        let rate = await RatingsSchema.findOne({userId:req.user.id});    
+        const RateMap  = {one:1 , two:2,three:3 , four: 4 , five : 5}
+
+            for (const [k,v] of Object.entries(RateMap)) {
+                if( rate.rating.value[k]?.includes(gameId) ) return res.json({ rating: v });
+            }
+        res.json({rating:null});
+
+    
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+export const addProgress = async (req,res)=>{
+    try {
+
+        const gameId = req.body.game;
+        const progress = req.body.newProgress;
+
+        if (!req.user?.id) {
+            return res.status(401).json({ message: "User not authenticated" });
+        }
+
+        const userId = new mongoose.Types.ObjectId(req.user.id);
+
+        let userProgress = await ProgressSchema.findOne({ userId });
+
+        if (!userProgress) {
+            userProgress = new ProgressSchema({ userId });
+        }
+        let totalHours = 0;
+
+        for (const [k,v] of userProgress.Progress) {
+            if(k != "TotalHours" ) totalHours += v;    
+        }
+        
+        userProgress.Progress.set(String(gameId), progress);
+        userProgress.Progress.set("TotalHours" , totalHours);
+        await userProgress.save();
+
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+export const GetProgress =  async (req,res)=>{
+    try {
+        
+        if (!req.user?.id) {
+            return res.status(401).json({ message: "User not authenticated" });
+        }
+        let UserProgress = await ProgressSchema.findOne({userId:req.user.id});
+        
+        res.json({UserProgress}); 
+
+
+    } catch (err) {
+        console.log(err);
+    }
+}
+

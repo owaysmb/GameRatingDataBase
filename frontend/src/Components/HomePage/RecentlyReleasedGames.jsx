@@ -33,7 +33,7 @@ export function RecentlyReleasedGames() {
         return(
             <>
         <div style={{padding:"80px"}}>
-                <h1 style={{color:"white",fontSize:"60px"}}>Recently Released Games</h1>
+                <h1 style={{color:"white",fontSize:"60px",cursor: "pointer"}} onClick={()=> navigate("/new-released-page")}>Recently Released Games</h1>
                 <div style={{position:"relative",display:"flex",alignItems:"center"}} >
                 <FaArrowCircleLeft style={{fontSize:"40px",color:"rgb(0, 204, 255)",position:"absolute",left:"0",cursor: "pointer",zIndex: "100"}} onClick={scrollLeft}/>
                 <div ref={TopRatedRef} style={{display:"flex",gap:"24px",overflow: "hidden"}}>

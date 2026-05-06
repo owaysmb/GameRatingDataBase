@@ -7,7 +7,7 @@ export function ProfileCover() {
    
     const { user, logout } = useContext(AuthContext);
 
-      
+
     return(
         <>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",width:"80%",padding:"50px"}}>

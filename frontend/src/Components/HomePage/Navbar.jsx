@@ -40,87 +40,131 @@ export function NavbarButton(){
             borderRadius:"20px",
             alignItems:"start",
             padding:"10px",
-            position:"absolute"
+            position:"absolute",
+            zIndex: 1000,
         },
         on:{
             transition: "all 0.8s ease",
-            height:"280px",
+            height:"350px",
             alignItems:"start",
             padding:"10px",
             borderRadius:"20px",
             width:"80%",
-            position:"absolute"
+            position:"absolute",
+            zIndex: 1000,
         },
     }
     function styleclicked(){
-        return clicked ? styles.on : styles.off
+        return clicked? styles.on : styles.off
     }
 
-  useEffect(() => {
-        if (visibleItems && clicked) {
-            setItemsToShow(0)
-            const timers = []
+//   useEffect(() => {
+//         if (visibleItems && clicked) {
+//             setItemsToShow(0)
+//             const timers = []
             
-            Items.forEach((_, index) => {
-                const timer = setTimeout(() => {
-                    setItemsToShow(index + 1)
-                }, index * 300)
-                timers.push(timer)
-            })
+//             Items.forEach((_, index) => {
+//                 const timer = setTimeout(() => {
+//                     setItemsToShow(index + 1)
+//                 }, index * 300)
+//                 timers.push(timer)
+//             })
             
-            return () => timers.forEach(timer => clearTimeout(timer))
-        } else {
-            setItemsToShow(0)
-        }
-    }, [visibleItems, clicked])
+//             return () => timers.forEach(timer => clearTimeout(timer))
+//         } else {
+//             setItemsToShow(0)
+//         }
+//     }, [visibleItems, clicked])
 
-
+const ListStyle = {
+        cursor:"pointer",
+        listStyle: "none",
+    }
 function ShowItems(){
     if(clicked){
         setVisibleItems(true)
     }
 }
 
+function closeNavbar() {
+    setClicked(false);
+    setVisibleItems(false);
+}
+
     function ShowCategoriesAfterClick() {
         return (
             
-    <div style={{
+    // <div style={{
         
-        marginTop: "20px",
-        display:"flex",
-        gap:"20px",
-        justifyContent:"space-evenly",
-        width:"100%",
+    //     marginTop: "20px",
+    //     display:"flex",
+    //     gap:"20px",
+    //     justifyContent:"space-evenly",
+    //     width:"100%",
 
-        }}>
+    //     }}>
     
-      {Items.map((x,index) => {
-        const isVisible = index < itemsToShow
-        return (
-        <div key={x.label} 
-            style={{ backgroundColor: x.bgColor, 
-            color: x.textColor ,
-            width:"150px",height:"150px",
-            borderRadius:"10px",
-            opacity: isVisible ? 1 : 0,
-            transform: isVisible ? 'translateY(0)' : 'translateY(-30px)', 
-            transition: 'all 0.4s ease',
-        }}>
-            <div style={{display:"flex",justifyContent:"center",padding:"10px"}}>{x.label}</div>
-            <div 
-            style={{
-                display:"flex",
-                flexDirection:"column",
-                alignItems:"start",
-                height:"70%",
-                justifyContent:"space-around",
-                padding:"10px",
-                }}>
-                    {x.links.map((i)=>(<div >{i}</div>))}
-          </div>
-        </div>
-      )})}  
+    //   {Items.map((x,index) => {
+    //     const isVisible = index < itemsToShow
+    //     return (
+    //     <div key={x.label} 
+    //         style={{ backgroundColor: x.bgColor, 
+    //         color: x.textColor ,
+    //         width:"150px",height:"150px",
+    //         borderRadius:"10px",
+    //         opacity: isVisible ? 1 : 0,
+    //         transform: isVisible ? 'translateY(0)' : 'translateY(-30px)', 
+    //         transition: 'all 0.4s ease',
+    //     }}>
+    //         <div style={{display:"flex",justifyContent:"center",padding:"10px"}}>{x.label}</div>
+    //         <div 
+    //         style={{
+    //             display:"flex",
+    //             flexDirection:"column",
+    //             alignItems:"start",
+    //             height:"70%",
+    //             justifyContent:"space-around",
+    //             padding:"10px",
+    //             }}>
+    //                 {x.links.map((i)=>(<div >{i}</div>))}
+    //       </div>
+    //     </div>
+    //   )})}  
+    // </div>
+    
+    <div style={{color:"white",fontSize:"20px",display:"flex",justifyContent:"space-evenly",width:"100%"}}>
+        {/* Discver */}
+        <ul style={{display:"grid",gap:"10px"}}> 
+            <h2>Discover</h2>
+            <li onClick={()=> {navigate("/top-rated-page"); closeNavbar()}}  style={ListStyle}>Top Games</li>
+            <li onClick={()=> {navigate("/new-released-page"); closeNavbar()}} style={ListStyle}>New Released</li>
+            <li onClick={()=> {navigate("/trending-page"); closeNavbar()}}     style={ListStyle}>Trending Games</li>
+            <li onClick={()=> {navigate("/Upcoming-page"); closeNavbar()}}     style={ListStyle}>Upcoming Games</li>
+        </ul>
+        {/* Database */}
+        <ul style={{display:"grid",gap:"10px"}}> 
+            <h2 >Database</h2>
+            <li style={ListStyle}>Advanced Search</li>
+            <li style={ListStyle}>Platforms</li>
+            <li style={ListStyle}>Events</li>
+        </ul >
+        {/* Community */}
+        <ul style={{display:"grid",gap:"10px"}}> 
+            <h2>Community</h2>
+            <li style={ListStyle} >Forums</li>
+            <li style={ListStyle} >Users</li>
+        </ul>
+        {/* Help */}
+        <ul style={{display:"grid",gap:"10px"}}> 
+            <h2>Help</h2>
+            <li style={ListStyle}>Contact</li>
+            <li style={ListStyle}>About GRDB</li>
+            <li style={ListStyle}>API Documentaions</li>
+            <li style={ListStyle}>Social Media</li>
+        </ul>
     </div>
+
+
   );
     }
     
@@ -158,7 +202,7 @@ function ShowItems(){
         if(!user){
             return(
                 <>
-                <PersonOutlinedIcon fontSize="large" sx={{backgroundColor:"transparent",color:"white",cursor:"pointer"}} onClick={handleLogin}/>
+                <PersonOutlinedIcon fontSize="large" sx={{backgroundColor:"transparent",color:"white",cursor:"pointer"}} onClick={()=>{handleLogin();closeNavbar()}}/>
                 </>
             )
         }else{
@@ -166,7 +210,7 @@ function ShowItems(){
                 <>
                 {/* {navigate("/profile")} */}
                 <div style={{display:"flex",alignContent:"center"}}>
-                    <PersonOutlinedIcon fontSize="large" sx={{backgroundColor:"transparent",color:"green",cursor:"pointer"}}  onClick={handleLogin}/>
+                    <PersonOutlinedIcon fontSize="large" sx={{backgroundColor:"transparent",color:"green",cursor:"pointer"}}  onClick={()=> {handleLogin();closeNavbar()}}/>
                     <button style={{backgroundColor:"lightblue",borderRadius:"10px",cursor:"pointer"}} onClick={handleLogout} >Logout</button>
                 </div>
                 </>
@@ -182,13 +226,13 @@ function ShowItems(){
             <div style={{...styleclicked(),display: "flex", flexDirection: "column",   padding: "10px",backgroundColor:"black"}} onTransitionEnd={ShowItems} >
             <div style={{display: "flex",justifyContent: "space-between",width: "100%",}}> 
                  <DehazeRoundedIcon onClick={onClick} sx={{color:"white",backgroundColor:"transparent",fontSize:"30px",cursor:"pointer"}}/>
-                 <img src={reactLogo} alt="logo" style={{cursor:"pointer"}} onClick={()=>navigate("/")} /> 
+                 <img src={reactLogo} alt="logo" style={{cursor:"pointer"}} onClick={()=>{navigate("/");closeNavbar()}} /> 
                  <form onSubmit={handleSearch}>
                    <input 
                    type="text" 
                    placeholder="  Search.." 
-                   style={{width:"400px" , backgroundColor:"black",borderRadius:"40px",color:"white",height:"30px"}}
-                   onChange={(e)=>setSearch(e.target.value)}
+                   style={{width:"400px",backgroundColor:"black",borderRadius:"40px",color:"black",height:"30px",border:"none",outline:"none",backgroundColor:"#53d8fb",font:"bold"}}
+                   onChange={(e)=>{setSearch(e.target.value);closeNavbar()}}
                    value={search}
                    /> 
                  </form>

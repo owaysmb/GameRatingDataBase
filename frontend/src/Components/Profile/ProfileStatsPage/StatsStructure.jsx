@@ -62,7 +62,6 @@ useEffect(() => {
     if (stats) fetchGames();
 }, [link, stats]);
 
-console.log(game)
 
     return (
         <>{loading ? <Loading/> 

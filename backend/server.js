@@ -4,13 +4,15 @@ import cors from "cors"
 import dotenv from "dotenv"
 import routers from "../backend/routes/routes.js"
 import connectDB from "./config/db.js";
-
+import igdbRouter from "./routes/IGDBRouter.js"
 
 dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(cors());
 app.use("/", routers);
+app.use("/", igdbRouter);
+
 connectDB(app.listen(3000));
 
 let accessToken = null;
@@ -41,7 +43,7 @@ async function getAccessToken() {
     return accessToken;
 }
 
-class IGDBService {
+export class IGDBService {
     constructor(){
         this.link = "https://api.igdb.com/v4/games";
     }

@@ -70,7 +70,16 @@ export function GameCoverAndTrailer({game}) {
         fetchFav();
     }, [id]); 
 
-
+useEffect(() => {
+    const fetchRating = async () => {
+        const res = await fetch(`http://localhost:3000/game/${id}/getrating`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        SetstarValue(data.rating);
+    };
+    fetchRating();
+}, [id]);
     
     return(
         <>  
@@ -125,15 +134,20 @@ export function GameCoverAndTrailer({game}) {
                 
                     <Box style={{backgroundColor:"rgb(255, 255, 255)", padding:"20px", borderRadius:"20px", textAlign:"center"}}>
                         <Rating 
-                        name="customized-10"  
-                        max={5} 
-                        style={{fontSize:"40px"}}
-                        value={starValue}
-                        onChange={(event,newValue)=>{
-                            SetstarValue(newValue);
-                            console.log("User selected:", newValue);
-                        }}
-                        
+                            name="customized-10"  
+                            max={5} 
+                            style={{fontSize:"40px"}}
+                            value={starValue}
+                            onChange={(event, newValue) => {
+                                SetstarValue(newValue);
+                            }}
+                            sx={{
+                                '& .MuiRating-iconFilled': {
+                                    color: starValue >= 4 ? '#00ff15' 
+                                        : starValue >= 3 ? '#fbff00' 
+                                        : '#ff0000'
+                                }
+                            }}
                         />
                     </Box>
             </div>
