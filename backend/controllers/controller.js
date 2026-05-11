@@ -313,3 +313,49 @@ export const GetProgress =  async (req,res)=>{
     }
 }
 
+export const AddReview = async (req,res)=>{
+    try {
+
+        const userId = new mongoose.Types.ObjectId(req.user.id);
+        const gameId = req.params.id;
+        const { review } = req.body; 
+        
+        let UserReview = await ReviewsSchema.findOne({ userId });
+        if (!UserReview) {
+            UserReview = new ReviewsSchema({ userId });
+        }
+
+        UserReview.games.push({ gameId, review: { text: review } });
+        await UserReview.save();
+        res.json({ message: "Review added successfully" });
+
+     } catch (err) {
+        console.log(err);
+    }
+}
+
+
+export const GetReview = async (req,res)=>{
+    try {
+        const gameId = req.params.id;         
+        if (!req.user?.id) {
+            return res.status(401).json({ message: "User not authenticated" });
+        }
+
+        let UserReview = await ReviewsSchema.findOne({ userId: req.user.id });
+
+        if (!UserReview) {
+            return res.json({ review: null });
+        }
+        
+        const reviews = UserReview.games.map(game => ({
+            gameId: game.gameId,
+            review: game.review.text
+        }));
+
+        return res.json({ reviews });
+
+    } catch (err) {
+        console.log(err);
+    }
+}

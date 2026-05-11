@@ -1,7 +1,9 @@
-
+import { useNavigate } from "react-router-dom";
 
 export function PagesCard({games}) {
     
+    const navigate = useNavigate(); 
+
     function release_date(g) {
     return(
         <>

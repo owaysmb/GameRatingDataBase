@@ -6,14 +6,17 @@ const ReviewsSchema = new mongoose.Schema({
     ref: "User",
     required: true
   }
-  ,gameId: {
-    type: String,
-    required: true,
-  },
-  reviewText: {
-    type: String,
-    required: true,
-  }
+  ,games: [{
+    gameId: {
+      type: String,
+      required: true
+    },
+    review: {
+      text: { type: String },
+      rating: { type: Number, min: 1, max: 10 }
+    }
+  }]
+  
 }, { timestamps: true });
 
 export default mongoose.model("Review", ReviewsSchema);

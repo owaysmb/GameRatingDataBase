@@ -5,6 +5,7 @@ export function AddToListModal({close}) {
     const [seleceted,Setselected] = useState([]) 
     const { id } = useParams();
     const token = localStorage.getItem("token")
+    
     const handlecheckbox = (list)=>{
         if(seleceted.includes(list)){
             Setselected(seleceted.filter(l => l !== list))

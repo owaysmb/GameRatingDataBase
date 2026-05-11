@@ -1,5 +1,5 @@
 import express from "express";
-import { login, signup ,addToList,addRating,getStats,addFavortie,GetFavorite, GetRating,addProgress , GetProgress} from "../controllers/controller.js";
+import { login, signup ,addToList,addRating,getStats,addFavortie,GetFavorite, GetRating,addProgress , GetProgress,AddReview,GetReview} from "../controllers/controller.js";
 
 import {AuthMiddleware} from "../middleware/authMiddleware.js"
 const router = express.Router();
@@ -17,6 +17,7 @@ router.get("/getfavorite",AuthMiddleware,GetFavorite);
 router.get("/game/:id/getrating",AuthMiddleware,GetRating);
 router.post("/progress",AuthMiddleware,addProgress);
 router.get("/getprogress",AuthMiddleware,GetProgress);
-
+router.post("/game/:id/addreview",AuthMiddleware,AddReview);
+router.get("/getreview",AuthMiddleware,GetReview);
 
 export default router

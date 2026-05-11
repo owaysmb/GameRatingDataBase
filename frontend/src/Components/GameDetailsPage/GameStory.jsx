@@ -1,8 +1,10 @@
 import { useState } from "react"
 import { AddToListModal } from "../AddToListModal"
+import { GameReviewModal } from "../GameReviewModal"
 
 export function GameStory({game}) {
     const [open,Setopen] = useState(false)
+    const [openReview,SetopenReview] = useState(false)
     function ShowAddTolist() {  
         return(
             <>
@@ -23,6 +25,27 @@ export function GameStory({game}) {
         )
     }
 
+    function ShowGameReview() {  
+        return(
+            <>
+                <div onClick={()=>SetopenReview(true)} style={{
+                            width:"200px",
+                            height:"50px", 
+                            backgroundColor:"rgba(255,255,255,0.1)", 
+                            borderRadius:"10px", 
+                            display:"flex", 
+                            justifyContent:"center", 
+                            alignItems:"center",
+                            cursor:"pointer",
+                            color:"white"
+                        }}>Review</div>
+
+                 {openReview && <GameReviewModal close={() => SetopenReview(false)} />}
+            </>
+        )
+    }
+
+
     return(
         <>
         <div style={{display:"flex",textAlign:"start",flexDirection:"column",padding:"30px",backgroundColor:"#111",marginTop:"40px",borderRadius:"10px"}}>
@@ -35,17 +58,7 @@ export function GameStory({game}) {
 
                     <div> <ShowAddTolist/></div>
 
-                    <div 
-                        style={{
-                            width:"200px", 
-                            height:"50px", backgroundColor:"rgba(255,255,255,0.1)", 
-                            borderRadius:"10px", 
-                            display:"flex", 
-                            justifyContent:"center", 
-                            alignItems:"center",
-                            cursor:"pointer"
-                            }}>Review
-                        </div>
+                    <div> <ShowGameReview/></div>
                 </div>
 
             </div>

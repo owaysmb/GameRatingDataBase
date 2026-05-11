@@ -158,7 +158,7 @@ app.get("/api/Recently_released",async (req ,res)=>{
 
 app.post("/games/batch", async (req, res) => {
     try {
-        const { ids, fields } = req.body;
+        const { ids, fields  } = req.body;
         if (!ids?.length) return res.json([]);
 
         const igdb = new IGDBService()
