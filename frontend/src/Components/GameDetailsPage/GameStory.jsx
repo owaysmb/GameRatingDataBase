@@ -1,24 +1,29 @@
 import { useState } from "react"
 import { AddToListModal } from "../AddToListModal"
 import { GameReviewModal } from "../GameReviewModal"
+import { useNavigate } from "react-router-dom"
 
 export function GameStory({game}) {
     const [open,Setopen] = useState(false)
     const [openReview,SetopenReview] = useState(false)
+    const navigate = useNavigate();
+
+    const buttonStyle = {
+        width:"200px",
+        height:"50px", 
+        backgroundColor:"rgba(255,255,255,0.1)", 
+        borderRadius:"10px", 
+        display:"flex", 
+        justifyContent:"center", 
+        alignItems:"center",
+        cursor:"pointer",
+        color:"white"
+    }
+
     function ShowAddTolist() {  
         return(
             <>
-                <div onClick={()=>Setopen(true)} style={{
-                            width:"200px",
-                            height:"50px", 
-                            backgroundColor:"rgba(255,255,255,0.1)", 
-                            borderRadius:"10px", 
-                            display:"flex", 
-                            justifyContent:"center", 
-                            alignItems:"center",
-                            cursor:"pointer",
-                            color:"white"
-                        }}>Add To List</div>
+                <div onClick={()=>Setopen(true)} style={buttonStyle}>Add To List</div>
 
                  {open && <AddToListModal close={() => Setopen(false)} />}
             </>
@@ -28,22 +33,15 @@ export function GameStory({game}) {
     function ShowGameReview() {  
         return(
             <>
-                <div onClick={()=>SetopenReview(true)} style={{
-                            width:"200px",
-                            height:"50px", 
-                            backgroundColor:"rgba(255,255,255,0.1)", 
-                            borderRadius:"10px", 
-                            display:"flex", 
-                            justifyContent:"center", 
-                            alignItems:"center",
-                            cursor:"pointer",
-                            color:"white"
-                        }}>Review</div>
+                <div onClick={()=>SetopenReview(true)} style={buttonStyle}>Review</div>
 
                  {openReview && <GameReviewModal close={() => SetopenReview(false)} />}
             </>
         )
     }
+
+
+
 
 
     return(
@@ -59,6 +57,7 @@ export function GameStory({game}) {
                     <div> <ShowAddTolist/></div>
 
                     <div> <ShowGameReview/></div>
+                    <div style={buttonStyle} onClick={() => navigate(`/game/${game.id}/forum`)}> Forum </div>
                 </div>
 
             </div>

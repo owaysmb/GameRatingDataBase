@@ -1,18 +1,20 @@
+import 'dotenv/config' 
+import dotenv from "dotenv"
+dotenv.config({ path: './backend/.env' }) 
+dotenv.config({ path: './.env' })
+
 import express from "express"
 import fetch from "node-fetch"
 import cors from "cors"
-import dotenv from "dotenv"
 import routers from "../backend/routes/routes.js"
 import connectDB from "./config/db.js";
 import igdbRouter from "./routes/IGDBRouter.js"
 
-dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(cors());
 app.use("/", routers);
 app.use("/", igdbRouter);
-
 connectDB(app.listen(3000));
 
 let accessToken = null;
@@ -237,7 +239,8 @@ app.get("/game/:id", async (req, res) => {
                     involved_companies.company.name,
                     involved_companies.developer,
                     involved_companies.publisher,
-                    similar_games
+                    similar_games,
+                    artworks.image_id
 ;
       `);
     if (!game) {

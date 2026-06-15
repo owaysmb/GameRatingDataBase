@@ -1,0 +1,100 @@
+import TextField from '@mui/material/TextField';
+import { useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+
+export function LinkPost() {
+
+    const { id } = useParams();
+    
+    const [title,setTitle] = useState("");
+    const [body,setBody] = useState("");
+    const [linkUrl,setLinkUrl] = useState("");
+    const token = localStorage.getItem("token")
+    const navigate = useNavigate();
+    
+    const handleLinkSubmit = async ()=>{
+        await fetch(`http://localhost:3000/game/${id}/addlinkpost`,{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json",
+                Authorization: `Bearer ${token}`
+            },
+            body:JSON.stringify({
+                title:title,
+                linkUrl:linkUrl,
+                body:body,
+            })
+        })
+            setTitle("")
+            setLinkUrl("")
+            setBody("")
+    }
+
+
+    return(
+        <>
+        <h1 style={{ textAlign:"center" }}>Link Post</h1>
+       <form>
+            <div style={{
+                display:"flex",
+                flexDirection:"column",
+                gap:"20px",
+                marginTop:"20px",
+                alignItems:"center",
+            }}>
+
+                <TextField
+                    variant="filled"
+                        label="Title"
+                        maxRows={6}
+                        style={{ width:"700px",backgroundColor:"lightblue",borderRadius:"10px", marginTop:"20px" }}
+                        onChange={(e) => setTitle(e.target.value)}
+                />
+
+                <TextField
+                    variant="filled"
+                        label="URL"
+                        maxRows={6}
+                        style={{ width:"700px",backgroundColor:"lightblue",borderRadius:"10px", marginTop:"20px" }}
+                        onChange={(e) => setLinkUrl(e.target.value)}
+                />
+
+                <TextField
+                    id="filled-multiline-static"
+                    label="Body"
+                    multiline
+                    rows={4}
+                    variant="filled"
+                    style={{ width:"700px",backgroundColor:"lightblue",borderRadius:"10px", marginTop:"20px" }}
+                    onChange={(e) => setBody(e.target.value)}
+                />
+                <button 
+                            type="submit" 
+                            style={{ 
+                                backgroundColor:"black",
+                                border:"none",
+                                borderRadius:"10px", 
+                                padding:"10px 20px", 
+                                marginTop:"20px",
+                                color:"#ff4aa3",
+                                fontSize:"16px",
+                                cursor:"pointer",
+                                bold:"true" ,
+                                boxShadow:"0 4px 8px rgba(255, 74, 163, 0.5)",
+                                }}
+                                onClick={(e) => {
+                                e.preventDefault();
+                                title.length > 0 && body.length > 0 && linkUrl.length > 0 ? handleLinkSubmit() && navigate(`/game/${id}/forum`) : alert("Please fill in all fields.");
+                                
+                            }}
+                                
+                                
+                        >Submit</button>
+            </div>
+       </form>
+        
+
+        </>
+    )
+}

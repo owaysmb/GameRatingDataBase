@@ -19,6 +19,9 @@ import { TopRatedPage } from '../src/Components/HomePage/NavBarPages/TopRatedPag
 import { NewReleasedPage } from './Components/HomePage/NavBarPages/NewRealesedPage';
 import { TrendingPage } from './Components/HomePage/NavBarPages/TrendingPage';
 import {UpcomingPage} from '../src/Components/HomePage/NavBarPages/UpcomingPage'
+import { ForumMainPage } from './Components/GameForum/ForumMainPage';
+import { CreatePost } from "../src/Components/GameForum/CreatePost";
+
 
 function App() {
 
@@ -41,6 +44,7 @@ function App() {
                 </>
             }>
             </Route>
+
             <Route path='/login' element={<Login/>}/>
             <Route path='/signup' element={<Signup/>}/>
             <Route path="/game/:id" element={<GameDetails />} /> {/* route this Component whenever the game:id is shown */}
@@ -50,8 +54,13 @@ function App() {
             <Route path='/new-released-page' element={<NewReleasedPage/>}/>
             <Route path='/trending-page' element={<TrendingPage/>}/>
             <Route path='/Upcoming-page' element={<UpcomingPage/>}/>
+            
           </Routes>
           
+          <Routes>
+            <Route path='/game/:id/forum' element={<ForumMainPage/>}/>
+            <Route path="/game/:id/forum/create-post" element={<CreatePost />} />
+          </Routes>
             
         </BrowserRouter>
     </AuthProvider>

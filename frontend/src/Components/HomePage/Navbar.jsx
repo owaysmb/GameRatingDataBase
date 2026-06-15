@@ -41,6 +41,9 @@ export function NavbarButton(){
             alignItems:"start",
             padding:"10px",
             position:"absolute",
+            zindex: 1000,
+            alignItems:"center",
+            
             zIndex: 1000,
         },
         on:{
@@ -51,6 +54,8 @@ export function NavbarButton(){
             borderRadius:"20px",
             width:"80%",
             position:"absolute",
+            postion:"absolute",
+            zindex: 1000,
             zIndex: 1000,
         },
     }

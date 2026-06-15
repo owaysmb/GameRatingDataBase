@@ -11,6 +11,21 @@ import ListsSchema from "../models/Lists.js";
 import FavoriteSchema from "../models/Favorite.js"
 import ProgressSchema from "../models/Progress.js";
 import Progress from "../models/Progress.js";
+import  Post  from '../models/Posts.js';
+
+// Cloudniary imports   
+import multer from 'multer'
+import { v2 as cloudinary } from 'cloudinary'
+
+const upload = multer({ storage: multer.memoryStorage() })
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_KEY,
+  api_secret: process.env.CLOUDINARY_SECRET,
+})
+console.log("Cloudinary config:", cloudinary.config())
+
 export const login = async (req,res)=>{
     try {
         const { email, password } = req.body
@@ -350,12 +365,158 @@ export const GetReview = async (req,res)=>{
         
         const reviews = UserReview.games.map(game => ({
             gameId: game.gameId,
-            review: game.review.text
+            review: game.review.text,
+            reviewId: game._id
         }));
 
         return res.json({ reviews });
 
     } catch (err) {
         console.log(err);
+    }
+}
+
+
+export const AddTextPost = async (req, res) => {
+    try {
+        const userId = new mongoose.Types.ObjectId(req.user.id);
+        const gameId = req.params.id;
+        const { title, body } = req.body;
+
+        const post = new Post({
+            forumId: gameId,
+            userId,
+            type: "text",
+            title,
+            text: body,
+            likes: 0,
+            disLikes: 0
+        })
+
+        await post.save()
+
+        res.status(201).json(post)
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Server error" })
+    }
+}
+
+
+
+export const AddLinkPost = async (req, res) => {
+    try {
+        const userId = new mongoose.Types.ObjectId(req.user.id);
+        const gameId = req.params.id;
+        const { title, body ,linkUrl} = req.body;
+
+        const post = new Post({
+            forumId: gameId,
+            userId,
+            type: "link",
+            title,
+            text: body,
+            linkUrl,
+            likes: 0,
+            disLikes: 0
+        })
+
+        await post.save()
+
+        res.status(201).json(post)
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Server error" })
+    }
+}
+
+export const GetAllPosts = async (req, res) => {
+  try {
+    const userId = new mongoose.Types.ObjectId(req.user.id);
+    const gameId = req.params.id;
+    const posts = await Post.find({ forumId: gameId })
+      .populate('userId', 'username')
+      .sort({ createdAt: -1 })
+      .limit(20)
+
+    res.json(posts)
+  } catch (err) {
+    res.status(500).json({ message: "Server error" })
+  }
+}
+
+const streamUpload = (buffer) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: 'posts' },
+      (error, result) => {
+        if (error) reject(error)
+        else resolve(result)
+      }
+    )
+    stream.end(buffer)
+  })
+}
+
+
+export const AddMediaPost = async (req, res) => {
+  try {
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_NAME,
+      api_key: process.env.CLOUDINARY_KEY,
+      api_secret: process.env.CLOUDINARY_SECRET,
+    })
+
+    const result = await streamUpload(req.file.buffer)
+
+    const post = new Post({
+      forumId: req.params.id,
+      userId: req.user.id,
+      type: "media",
+      title: req.body.title,
+      mediaUrl: result.secure_url,
+    })
+
+    await post.save()
+    res.status(201).json(post)
+
+  } catch (err) {
+    console.log("ERROR:", err)
+    res.status(500).json({ message: "Server error" })
+  }
+}
+
+export const DeletePost = async (req, res) => {
+    try {
+        const postId = req.params.postId;
+        const post = await Post.findByIdAndDelete(postId);
+        if (!post) {
+            return res.status(404).json({ message: "Post not found" });
+        }
+        res.json({ message: "Post deleted successfully" });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Server error" });
+    }
+}
+
+export const DeleteReview = async (req, res) => {
+    try {
+        const reviewId = req.params.reviewId;
+        console.log("reviewId:", reviewId);
+        const result = await ReviewsSchema.findOneAndUpdate(
+            { "games._id": reviewId },
+            { $pull: { games: { _id: reviewId } } },
+            { new: true }
+        );
+        if (!result) {
+            return res.status(404).json({ message: "Review not found" });
+        }
+        res.json({ message: "Review deleted successfully" });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Server error" });
     }
 }

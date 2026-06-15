@@ -2,5 +2,23 @@ body{
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     padding: 0; 
     margin: 0;
-    
 }
+:root {
+  color-scheme: dark;
+  --bg: #111;
+  --surface: rgba(255, 255, 255, 0.04);
+  --surface-strong: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.12);
+  --primary: #9b5cf8;
+  --secondary: #ff4aa3;
+  --accent: #b645ff;
+  --text: #f7f3ff;
+  --muted: rgba(255, 255, 255, 0.7);
+  --glow-purple: rgba(155, 92, 248, 0.35);
+  --glow-purple: rgba(255, 74, 163, 0.26);
+}
+
+li:hover {
+    color: var(--secondary);
+}
+

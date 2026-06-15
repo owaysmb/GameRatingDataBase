@@ -39,7 +39,7 @@ export function ProfileFavorite() {
                 const data = await res.json();
                 setGames(data);
             }
-            if (Fav.length > 0) {
+            if (Fav?.length > 0) {
                 fetchGames();
             }
         }, [Fav]);
@@ -54,7 +54,7 @@ export function ProfileFavorite() {
     <>
      <h1>{user?.username}'s Favorites : </h1>
             <div style={{display:"flex",gap:"20px",padding:"30px",backgroundColor:"#111",borderRadius:"20px",justifyContent:"space-around",overflow:"hidden"}}>
-                    {game.map((g) => {
+                    {game?.map((g) => {
                     return (
                         <div key={g.id} style={{display:"flex", flexDirection:"column", alignItems:"center", width:"150px" ,cursor:"pointer"}} onClick={()=>{navigate(`/game/${g.id}`)}}>
                             { g.cover 
