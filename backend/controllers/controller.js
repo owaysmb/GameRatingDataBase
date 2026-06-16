@@ -1,6 +1,7 @@
 
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken";
+import {cache, clearCache} from "../cache.js"
 
 import mongoose from "mongoose";
 // users Model imports 
@@ -92,6 +93,7 @@ export const addToList = async (req,res) =>{
         const { status } = req.body;
 
         let list = await ListsSchema.findOne({ userId });
+        await clearCache(`list:all:${userId}`);
         if (!list) {
             list = new ListsSchema({ userId });
         }
@@ -142,7 +144,7 @@ export const addRating = async(req,res)=>{
         }
 
         let userRating = await RatingsSchema.findOne({userId})
-
+        await clearCache(`rating:all:${userId}`);
         if(!userRating){
             userRating  = new RatingsSchema({userId})
         }
@@ -164,7 +166,7 @@ for (const key of Object.keys(userRating.rating.value)) {
 
         for (const [k,v] of Object.entries(RateRules)) {
 
-            
+            await clearCache(`rating:${userId}:${gameId}`);
             if(v == rating.toString()){
 
                 if(userRating.rating.value[k].includes(gameId) ){ 
@@ -192,7 +194,7 @@ export const getStats = async (req, res) => {
         }
 
         const userId = new mongoose.Types.ObjectId(req.user.id);
-        const list = await ListsSchema.findOne({ userId });
+        const list = await cache(`list:all:${userId}`, () => ListsSchema.findOne({ userId }));
 
         if (!list) {
             return res.json({
@@ -202,7 +204,7 @@ export const getStats = async (req, res) => {
         }
 
         res.json({
-            ...list.toObject(),
+            ...list,
             allgames: [
                 ...(list.played ?? []),
                 ...(list.playing ?? []),
@@ -226,7 +228,7 @@ export const addFavortie = async (req,res)=>{
         console.log("user not dound")
     }
     let userFavorite = await FavoriteSchema.findOne({userId})
-
+    await clearCache(`favorite:${userId}`);
     if(!userFavorite){
         userFavorite = new FavoriteSchema({userId})
     }
@@ -249,7 +251,7 @@ export const GetFavorite = async (req,res)=>{
             return res.status(401).json({ message: "User not authenticated" });
         }
 
-    let fav = await FavoriteSchema.findOne({userId:req.user.id});    
+    let fav = await cache(`favorite:${req.user.id}`, () => FavoriteSchema.findOne({userId:req.user.id}));    
     res.json(fav)
     
     } catch (err) {
@@ -266,7 +268,7 @@ export const GetRating = async (req,res)=>{
             return res.status(401).json({ message: "User not authenticated" });
         }
 
-        let rate = await RatingsSchema.findOne({userId:req.user.id});    
+        let rate = await cache(`rating:${req.user.id}:${gameId}`, () => RatingsSchema.findOne({userId:req.user.id}));    
         const RateMap  = {one:1 , two:2,three:3 , four: 4 , five : 5}
 
             for (const [k,v] of Object.entries(RateMap)) {
@@ -294,6 +296,8 @@ export const addProgress = async (req,res)=>{
 
         let userProgress = await ProgressSchema.findOne({ userId });
 
+        await clearCache(`progress:${userId}`);
+
         if (!userProgress) {
             userProgress = new ProgressSchema({ userId });
         }
@@ -318,7 +322,7 @@ export const GetProgress =  async (req,res)=>{
         if (!req.user?.id) {
             return res.status(401).json({ message: "User not authenticated" });
         }
-        let UserProgress = await ProgressSchema.findOne({userId:req.user.id});
+        let UserProgress = await  cache(`progress:${req.user.id}`, () => ProgressSchema.findOne({userId:req.user.id}));
         
         res.json({UserProgress}); 
 
@@ -336,6 +340,9 @@ export const AddReview = async (req,res)=>{
         const { review } = req.body; 
         
         let UserReview = await ReviewsSchema.findOne({ userId });
+
+        await clearCache(`review:all:${userId}`);
+
         if (!UserReview) {
             UserReview = new ReviewsSchema({ userId });
         }
@@ -357,7 +364,7 @@ export const GetReview = async (req,res)=>{
             return res.status(401).json({ message: "User not authenticated" });
         }
 
-        let UserReview = await ReviewsSchema.findOne({ userId: req.user.id });
+        let UserReview = await cache(`review:${req.user.id}:${gameId}`, () => ReviewsSchema.findOne({ userId: req.user.id }));
 
         if (!UserReview) {
             return res.json({ review: null });
@@ -392,7 +399,7 @@ export const AddTextPost = async (req, res) => {
             likes: 0,
             disLikes: 0
         })
-
+        await clearCache(`posts:${gameId}`); 
         await post.save()
 
         res.status(201).json(post)
@@ -422,6 +429,7 @@ export const AddLinkPost = async (req, res) => {
             disLikes: 0
         })
 
+        await clearCache(`posts:${gameId}`); 
         await post.save()
 
         res.status(201).json(post)
@@ -436,10 +444,12 @@ export const GetAllPosts = async (req, res) => {
   try {
     const userId = new mongoose.Types.ObjectId(req.user.id);
     const gameId = req.params.id;
-    const posts = await Post.find({ forumId: gameId })
-      .populate('userId', 'username')
-      .sort({ createdAt: -1 })
-      .limit(20)
+    const posts = await cache(`posts:${gameId}`, () => Post.find({ forumId: gameId })
+            .populate('userId', 'username')
+            .sort({ createdAt: -1 })
+            .limit(20)
+        );
+      
 
     res.json(posts)
   } catch (err) {
@@ -478,7 +488,7 @@ export const AddMediaPost = async (req, res) => {
       title: req.body.title,
       mediaUrl: result.secure_url,
     })
-
+    await clearCache(`posts:${req.params.id}`);
     await post.save()
     res.status(201).json(post)
 
@@ -491,10 +501,15 @@ export const AddMediaPost = async (req, res) => {
 export const DeletePost = async (req, res) => {
     try {
         const postId = req.params.postId;
-        const post = await Post.findByIdAndDelete(postId);
+        const post = await Post.findById(postId);
+
         if (!post) {
             return res.status(404).json({ message: "Post not found" });
         }
+
+        await Post.findByIdAndDelete(postId);
+        await clearCache(`posts:${post.forumId}`);
+
         res.json({ message: "Post deleted successfully" });
     } catch (err) {
         console.log(err);
@@ -514,6 +529,8 @@ export const DeleteReview = async (req, res) => {
         if (!result) {
             return res.status(404).json({ message: "Review not found" });
         }
+        cache(`review:${req.user.id}:${gameId}`);
+        
         res.json({ message: "Review deleted successfully" });
     } catch (err) {
         console.log(err);

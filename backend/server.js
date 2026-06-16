@@ -9,6 +9,18 @@ import cors from "cors"
 import routers from "../backend/routes/routes.js"
 import connectDB from "./config/db.js";
 import igdbRouter from "./routes/IGDBRouter.js"
+import redis from "redis";
+import {cache, clearCache} from "./cache.js"
+
+const redisClient = redis.createClient();
+
+(async () => {
+    redisClient.on("error", (err) => console.log("Redis Client Error", err));
+    await redisClient.connect();
+    await redisClient.ping();
+})();
+
+export default redisClient;
 
 const app = express();
 app.use(express.json());
@@ -78,12 +90,12 @@ app.get("/",(req,res)=>{
 app.get("/api/top-rated",async (req ,res)=>{
     try{
         const TopRatedRes = new IGDBService()
-        const data = await TopRatedRes.FetchRes(`
+        const data = await cache("igdb:top-rated",()=> TopRatedRes.FetchRes(`
                         fields name, cover.url, genres.name, rating, rating_count;
                         where rating != null & rating_count >= 1200;
                         sort rating desc;
                         limit 10;
-                    `)
+                    `)); 
         res.json(data)
     }catch (err){
         res.status(500).json({error:"IGDB Fetch Failed"});
@@ -97,7 +109,7 @@ app.get("/api/Trending",async (req ,res)=>{
         const threeMonthsAgo = Math.floor(Date.now() / 1000) - 60 * 60 * 24 * 90;
 
         const igdb = new IGDBService();
-        const data = await igdb.FetchRes(`
+        const data = await cache("igdb:trending", () => igdb.FetchRes(`
                   fields 
                     name,
                     cover.url,
@@ -109,7 +121,7 @@ app.get("/api/Trending",async (req ,res)=>{
                   sort rating_count desc;
                   limit 20;
 
-                `);
+                `)); 
         res.json(data)
 
     }catch (err){
@@ -119,7 +131,7 @@ app.get("/api/Trending",async (req ,res)=>{
 app.get("/api/Upcoming",async (req ,res)=>{
     try{
         const igdb = new IGDBService()
-        const data = await igdb.FetchRes(`
+        const data = await  cache("igdb:upcoming", () => igdb.FetchRes(`
                   fields 
                   name,
                   cover.url,
@@ -129,7 +141,7 @@ app.get("/api/Upcoming",async (req ,res)=>{
                 where hypes != null & first_release_date > ${Math.floor(Date.now() / 1000)};
                 sort hypes desc;
                 limit 20;
-                `);
+                `));
         res.json(data)
     }catch (err){
         res.status(500).json({error:"IGDB Fetch Failed"});
@@ -143,14 +155,14 @@ app.get("/api/Recently_released",async (req ,res)=>{
         
         const igdb = new IGDBService()
 
-        const data = await igdb.FetchRes(`
+        const data = await cache("igdb:recently-released", () => igdb.FetchRes(`
                   fields name, cover.url, genres.name, first_release_date;
                   where first_release_date < ${now}
                     & first_release_date > ${last30Days}
                     & cover != null;
                   sort first_release_date desc;
                   limit 20;
-                `);
+                `));
         res.json(data)
     }catch (err){
         res.status(500).json({error:"IGDB Fetch Failed"});
@@ -165,11 +177,11 @@ app.post("/games/batch", async (req, res) => {
 
         const igdb = new IGDBService()
 
-        const games = await igdb.FetchRes(`
+        const games = await cache("igdb:batch-games", () => igdb.FetchRes(`
                 where id = (${ids.join(",")});
                 fields ${fields ?? "name, cover.url, rating"};
                 limit 50;
-            `);
+            `));
 
         const ttbRes = await fetch("https://api.igdb.com/v4/game_time_to_beats", {
             method: "POST",
@@ -219,7 +231,7 @@ app.get("/game/:id", async (req, res) => {
 
     const igdb = new IGDBService();
 
-    const [game] = await igdb.FetchRes(`
+    const games = await cache(`igdb:game:${id}`, () => igdb.FetchRes(`
         where id = ${id};
         fields      name,
                     rating,
@@ -242,69 +254,70 @@ app.get("/game/:id", async (req, res) => {
                     similar_games,
                     artworks.image_id
 ;
-      `);
+      `));
+    const game = games[0];
     if (!game) {
       return res.status(404).json({ error: "Game not found" });
     }
-let trailer = null;
+    let trailer = null;
 
-if (game.videos?.length) {
-  const trailerVideo = game.videos[0];
-  trailer = `https://www.youtube.com/embed/${trailerVideo.video_id}`;
-}
-
-const cover = game.cover?.url
-  ? `https:${game.cover.url.replace("t_thumb", "t_cover_big")}`
-  : null;
-
-const release_date = game.first_release_date
-  ? new Date(game.first_release_date * 1000).toDateString()
-  : null;
-
-const screenshots = []
-if(game.screenshots?.length){
-    game.screenshots.map(sc =>(
-      screenshots.push(sc)
-    ))
-}
-
-const ttbRes = await fetch("https://api.igdb.com/v4/game_time_to_beats", {
-    method: "POST",
-    headers: {
-        "Client-ID": process.env.TWITCH_CLIENT_ID,
-        "Authorization": `Bearer ${await getAccessToken()}`,
-        "Content-Type": "text/plain",
-    },
-    body: `where game_id = ${id}; fields hastily, normally, completely;`,
-});
-
-const ttbData = await ttbRes.json();
-const ttb = ttbData[0];
-
-const timeToBeat = ttb ? {
-    hastily:    ttb.hastily    ? Math.round(ttb.hastily / 3600)    : null,
-    normally:   ttb.normally   ? Math.round(ttb.normally / 3600)   : null,
-    completely: ttb.completely ? Math.round(ttb.completely / 3600) : null,
-} : null;
-
-  let similarGames = [];
-    if(game.similar_games?.length){
-      const similarRes = new IGDBService()
-      similarGames = await similarRes.FetchRes(`
-        where id = (${game.similar_games.slice(0, 6).join(",")});
-        fields name, cover.url, rating;
-      `);
+    if (game.videos?.length) {
+    const trailerVideo = game.videos[0];
+    trailer = `https://www.youtube.com/embed/${trailerVideo.video_id}`;
     }
 
-    res.json({
-      ...game,
-      cover,
-      trailer,
-      release_date,
-      timeToBeat,
-      screenshots,
-      similarGames
+    const cover = game.cover?.url
+    ? `https:${game.cover.url.replace("t_thumb", "t_cover_big")}`
+    : null;
+
+    const release_date = game.first_release_date
+    ? new Date(game.first_release_date * 1000).toDateString()
+    : null;
+
+    const screenshots = []
+    if(game.screenshots?.length){
+        game.screenshots.map(sc =>(
+        screenshots.push(sc)
+        ))
+    }
+
+    const ttbRes = await fetch("https://api.igdb.com/v4/game_time_to_beats", {
+        method: "POST",
+        headers: {
+            "Client-ID": process.env.TWITCH_CLIENT_ID,
+            "Authorization": `Bearer ${await getAccessToken()}`,
+            "Content-Type": "text/plain",
+        },
+        body: `where game_id = ${id}; fields hastily, normally, completely;`,
     });
+
+    const ttbData = await ttbRes.json();
+    const ttb = ttbData[0];
+
+    const timeToBeat = ttb ? {
+        hastily:    ttb.hastily    ? Math.round(ttb.hastily / 3600)    : null,
+        normally:   ttb.normally   ? Math.round(ttb.normally / 3600)   : null,
+        completely: ttb.completely ? Math.round(ttb.completely / 3600) : null,
+    } : null;
+
+    let similarGames = [];
+        if(game.similar_games?.length){
+        const similarRes = new IGDBService()
+        similarGames = await similarRes.FetchRes(`
+            where id = (${game.similar_games.slice(0, 6).join(",")});
+            fields name, cover.url, rating;
+        `);
+        }
+
+        res.json({
+        ...game,
+        cover,
+        trailer,
+        release_date,
+        timeToBeat,
+        screenshots,
+        similarGames
+        });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch game" });
   }
@@ -317,11 +330,11 @@ app.get("/search/:name", async (req, res) => {
   try {
     const response = new IGDBService();
 
-    const data = await response.FetchRes(`
+    const data = await cache(`igdb:search:${name}`, () => response.FetchRes(`
         search "${name}";
         fields   id,name,cover.url;   
         limit 1;
-      `);
+      `));
     res.json(data);
 
   } catch (error) {
