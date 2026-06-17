@@ -176,8 +176,8 @@ app.post("/games/batch", async (req, res) => {
         if (!ids?.length) return res.json([]);
 
         const igdb = new IGDBService()
-
-        const games = await cache("igdb:batch-games", () => igdb.FetchRes(`
+        const cacheKey = `igdb:batch-games:${ids.sort().join(",")}`;
+        const games = await cache(cacheKey, () => igdb.FetchRes(`
                 where id = (${ids.join(",")});
                 fields ${fields ?? "name, cover.url, rating"};
                 limit 50;

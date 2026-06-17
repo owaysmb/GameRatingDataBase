@@ -50,6 +50,12 @@ export function ProfileReviews() {
         if (Reviews?.length > 0) fetchGames();
     }, [Reviews]);
 
+    const handleDeleteClick = async (reviewId) => {
+        const success = await deleteReview(reviewId);
+        if (success) {
+            setGames(prev => prev.filter(g => g.reviewId !== reviewId));
+        }
+    };
     return (
         <>
             <h1>{user?.username}'s Reviews : </h1>
@@ -62,7 +68,7 @@ export function ProfileReviews() {
                                 ? <img src={g.cover} alt={g.name} style={{width:"150px",height:"200px",objectFit:"cover",borderRadius:"8px"}} onClick={() => navigate(`/game/${g.id}`)} />
                                 : <div style={{width:"150px",height:"200px",backgroundColor:"#333",borderRadius:"8px",display:"flex",alignItems:"center",justifyContent:"center",color:"#666"}}>No Image</div>
                             }
-                            <MdDelete onClick={() => deleteReview(g.reviewId)} style={{fontSize:"30px",cursor:"pointer"}} />
+                           <MdDelete onClick={() => handleDeleteClick(g.reviewId)} style={{fontSize:"30px",cursor:"pointer"}} />
                         </div>
 
                         <div style={{display:"flex",flexDirection:"column",alignItems:"center",width:"250px",cursor:"pointer"}}>

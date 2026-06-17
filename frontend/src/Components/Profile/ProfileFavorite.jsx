@@ -53,7 +53,7 @@ export function ProfileFavorite() {
     return(
     <>
      <h1>{user?.username}'s Favorites : </h1>
-            <div style={{display:"flex",gap:"20px",padding:"30px",backgroundColor:"#111",borderRadius:"20px",justifyContent:"space-around",overflow:"hidden"}}>
+            <div style={{display:"flex",gap:"20px",padding:"30px",backgroundColor:"#111",borderRadius:"20px",justifyContent:"space-around",textAlign:"center",flexWrap:"wrap"}}>
                     {game?.map((g) => {
                     return (
                         <div key={g.id} style={{display:"flex", flexDirection:"column", alignItems:"center", width:"150px" ,cursor:"pointer"}} onClick={()=>{navigate(`/game/${g.id}`)}}>

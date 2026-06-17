@@ -364,7 +364,7 @@ export const GetReview = async (req,res)=>{
             return res.status(401).json({ message: "User not authenticated" });
         }
 
-        let UserReview = await cache(`review:${req.user.id}:${gameId}`, () => ReviewsSchema.findOne({ userId: req.user.id }));
+        let UserReview = await cache(`review:${req.user.id}:${req.user.id}`, () => ReviewsSchema.findOne({ userId: req.user.id }));
 
         if (!UserReview) {
             return res.json({ review: null });
@@ -524,12 +524,13 @@ export const DeleteReview = async (req, res) => {
         const result = await ReviewsSchema.findOneAndUpdate(
             { "games._id": reviewId },
             { $pull: { games: { _id: reviewId } } },
-            { new: true }
+            { returnDocument: 'after' },
+            {new:"new"}
         );
         if (!result) {
             return res.status(404).json({ message: "Review not found" });
         }
-        cache(`review:${req.user.id}:${gameId}`);
+        await clearCache(`review:all:${req.user.id}`);
         
         res.json({ message: "Review deleted successfully" });
     } catch (err) {

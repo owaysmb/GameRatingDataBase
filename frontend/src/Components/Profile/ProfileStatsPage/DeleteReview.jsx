@@ -13,7 +13,7 @@ export function DeleteReviews() {
             }
         });
 
-        if (res.ok) window.location.reload();
+        return res.ok;
 
     };
     return handleDelete;
