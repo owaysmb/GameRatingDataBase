@@ -30,35 +30,28 @@ export function NavbarButton(){
             setVisibleItems(false);
         }
     }
-    
-    const styles = {
-        off:{
-            height: "40px",
-            width:"80%",
-            transition: "height 2s",
-            transition: "all 0.8s ease",
-            borderRadius:"20px",
-            alignItems:"start",
-            padding:"10px",
-            position:"absolute",
-            zindex: 1000,
-            alignItems:"center",
-            
-            zIndex: 1000,
-        },
-        on:{
-            transition: "all 0.8s ease",
-            height:"350px",
-            alignItems:"start",
-            padding:"10px",
-            borderRadius:"20px",
-            width:"80%",
-            position:"absolute",
-            postion:"absolute",
-            zindex: 1000,
-            zIndex: 1000,
-        },
-    }
+const styles = {
+    off: {
+        height: "40px",
+        width: "80%",
+        transition: "all 0.8s ease",
+        borderRadius: "20px",
+        padding: "10px",
+        position: "absolute",
+        alignItems: "center",
+        zIndex: 1000,
+    },
+    on: {
+        transition: "all 0.8s ease",
+        height: "350px",
+        alignItems: "start",
+        padding: "10px",
+        borderRadius: "20px",
+        width: "80%",
+        position: "absolute",
+        zIndex: 1000,
+    },
+};
     function styleclicked(){
         return clicked? styles.on : styles.off
     }
@@ -236,7 +229,7 @@ function closeNavbar() {
                    <input 
                    type="text" 
                    placeholder="  Search.." 
-                   style={{width:"400px",backgroundColor:"black",borderRadius:"40px",color:"black",height:"30px",border:"none",outline:"none",backgroundColor:"#53d8fb",font:"bold"}}
+                   style={{width:"400px",borderRadius:"40px",color:"black",height:"30px",border:"none",outline:"none",backgroundColor:"#53d8fb",font:"bold"}}
                    onChange={(e)=>{setSearch(e.target.value);closeNavbar()}}
                    value={search}
                    /> 

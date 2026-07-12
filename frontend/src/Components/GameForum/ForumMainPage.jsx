@@ -16,17 +16,25 @@ export function ForumMainPage() {
   const [game, setGame] = useState(null);
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState([]);
+  const [forum, setForum] = useState(null);
+  const [ForumButtonClicked, setForumButtonClicked] = useState(false);
 
   const deletePost = DeletePosts();
 
   useEffect(() => {
-    fetch(`http://localhost:3000/game/${id}`)
-      .then(res => res.json())
-      .then(data => {
+    const fetchGame = async () => {
+      try {
+        const res = await fetch(`http://localhost:3000/game/${id}`);
+        const data = await res.json();
         setGame(data);
+      } catch (err) {
+        console.error("Failed to load game", err);
+      } finally {
         setLoading(false);
-        console.log(data);
-      });
+      }
+    };
+
+    fetchGame();
   }, [id]);
 
   useEffect(() => {
@@ -39,8 +47,69 @@ export function ForumMainPage() {
     .then(data => setPosts(data))
   }, [id])
 
+  const toggleForumMembership = async () => {
+    const nextValue = !ForumButtonClicked;
+    setForumButtonClicked(nextValue);
 
-  if (loading || !game) return <p style={{ color: "white" }}>Loading...</p>;
+    try {
+      const res = await fetch(`http://localhost:3000/game/${id}/join-forum`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        },
+        body: JSON.stringify({ gameId: id, forumJoined: nextValue })
+      });
+
+      if (!res.ok) {
+        setForumButtonClicked(ForumButtonClicked);
+        console.error("Failed to update forum membership");
+        return;
+      }
+
+      const data = await res.json();
+      console.log(data.message);
+    } catch (err) {
+      setForumButtonClicked(ForumButtonClicked);
+      console.error("Join forum error", err);
+    }
+  };
+
+
+
+
+  useEffect(() => {
+    const fetchForum = async () => {
+      try {
+        const res = await fetch(`http://localhost:3000/game/${id}/get-forum`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+          }
+        });
+
+        if (!res.ok) {
+          console.error("Failed to load forum data");
+          return;
+        }
+
+        const data = await res.json();
+        setForum(data.forum || null);
+        console.log("Forum data", data);
+        if (data.forum && data.forum.Forums.includes(id)) {
+          setForumButtonClicked(true);
+        } else {
+          setForumButtonClicked(false);
+        }
+      } catch (err) {
+        console.error("Forum fetch error", err);
+      }
+    };
+
+    fetchForum();
+  }, [id]);
+
+  if (loading) return <p style={{ color: "white" }}>Loading...</p>;
+  if (!game) return <p style={{ color: "white" }}>Could not load game details.</p>;
 
   const backgroundImage = game.artworks?.[0]?.image_id
     ? getImageUrl(game.artworks[0].image_id, "1080p")
@@ -53,6 +122,17 @@ export function ForumMainPage() {
     : null;
 
 
+  const ForumButtonStyle = {
+    backgroundColor: "green",
+    color: "white",
+    padding: "10px 20px",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    fontSize: "16px",
+    transition: "background-color 0.3s ease",
+  }
+
   const buttonstyle = {
     padding: "10px 20px",
     backgroundColor: "#007bff",
@@ -63,6 +143,8 @@ export function ForumMainPage() {
     fontSize: "16px",
     transition: "background-color 0.3s ease",
   }
+
+
   return (
     <>
     {/* cover and background section */}
@@ -92,7 +174,7 @@ export function ForumMainPage() {
         }}>
             { (
           <img
-             src={game.cover}
+             src={coverImage || ""}
             alt={game.name}
             style={{ 
                 borderRadius: "40px",
@@ -118,7 +200,10 @@ export function ForumMainPage() {
         marginTop: "20px",
         width: "90%",
       }}>
-        <button style={buttonstyle}>Join Forum</button>
+        
+        <button style={ForumButtonClicked ? ForumButtonStyle : buttonstyle} onClick={toggleForumMembership}>
+          {ForumButtonClicked ? "Joined" : "Join Forum"}
+        </button>
         <button style={buttonstyle} onClick={() => navigate(`/game/${id}/forum/create-post`)}>
           Create Post
         </button>

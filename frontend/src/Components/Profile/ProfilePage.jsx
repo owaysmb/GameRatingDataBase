@@ -5,6 +5,7 @@ import { ProfileCover } from "./ProfileCover";
 import {ProfileStats} from "./ProfileStats"
 import { ProfileReviews } from "./ProfileReviews";
 import {ProfileFavorite} from "../Profile/ProfileFavorite"
+import {ProfileForums} from "../Profile/ProfileForums"
 export function ProfilePage() {
     const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate()
@@ -24,7 +25,8 @@ export function ProfilePage() {
             <ProfileFavorite/>
             <br />
             <ProfileReviews/>
-            
+            <br />
+            <ProfileForums/>
             
         </div>
     )

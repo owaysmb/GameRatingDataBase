@@ -9,6 +9,8 @@ export function Signup() {
         console.log(res)
         if(res.message == "Signup successful"){
             navigate("/")
+        }else {
+            alert("Signup failed. Please one of these - input fields are empty , invalid input , email is not a Gmail address.");
         }
     }
     return(<SignupForm onSubmit={handleSubmit}/>)
