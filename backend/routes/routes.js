@@ -17,7 +17,12 @@ import {
     GetAllPosts,
     AddMediaPost,
     DeletePost,
-    DeleteReview
+    DeleteReview,
+    joinForum,
+    getForum,
+    updateUserProfile,
+    handleLike,
+    handleImageUpload
     } from "../controllers/controller.js";
 
 import {AuthMiddleware} from "../middleware/authMiddleware.js"
@@ -32,6 +37,8 @@ router.post("/profile", AuthMiddleware, (req,res)=>{
 })
 router.post("/login", login);
 router.post("/signup", signup);
+router.put("/profile/update", AuthMiddleware, updateUserProfile);
+router.post("/file-upload", AuthMiddleware, upload.single("image"), handleImageUpload);
 router.post("/game/:id/addtolist", AuthMiddleware, addToList);
 router.post("/game/:id/rate", AuthMiddleware, addRating);
 router.get("/getstats",AuthMiddleware,getStats);
@@ -48,5 +55,8 @@ router.get("/game/:id/getposts",AuthMiddleware,GetAllPosts);
 router.post('/game/:id/addmediapost', AuthMiddleware, upload.single('media'), AddMediaPost);
 router.delete("/game/:id/deletepost/:postId", AuthMiddleware, DeletePost);
 router.delete("/deletereview/:reviewId", AuthMiddleware, DeleteReview);
+router.post("/game/:id/join-forum", AuthMiddleware, joinForum);
+router.get("/game/:id/get-forum", AuthMiddleware , getForum);
+router.post("/post-like" , AuthMiddleware , handleLike);
 
 export default router

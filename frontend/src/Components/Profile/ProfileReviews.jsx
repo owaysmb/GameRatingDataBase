@@ -15,13 +15,23 @@ export function ProfileReviews() {
     const deleteReview = DeleteReviews();
 
     const fetchReviews = async () => {
-        const resReviews = await fetch("http://localhost:3000/getreview", {
-            headers: {
-                "Authorization": `Bearer ${token}`
+        try {
+            const resReviews = await fetch("http://localhost:3000/getreview", {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+            const data = await resReviews.json();
+            const reviews = Array.isArray(data.reviews) ? data.reviews : [];
+            SetReviews(reviews);
+            if (!reviews.length) {
+                setGames([]);
             }
-        });
-        const data = await resReviews.json();
-        SetReviews(data.reviews);
+        } catch (error) {
+            console.error("Failed to load reviews:", error);
+            SetReviews([]);
+            setGames([]);
+        }
     };
 
     useEffect(() => {
@@ -30,21 +40,32 @@ export function ProfileReviews() {
 
     useEffect(() => {
         const fetchGames = async () => {
-            const res = await fetch("http://localhost:3000/games/batch", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ ids: Reviews.map(r => r.gameId) }),
-            });
-            const data = await res.json();
-            const gamesWithReviews = Reviews.map(r => {
-                const gameData = data.find(g => String(g.id) === r.gameId);
-                return { ...gameData, review: r.review, reviewId: r.reviewId };
-            });
+            try {
+                const ids = Reviews.map(r => r.gameId).filter(Boolean);
+                if (!ids.length) {
+                    setGames([]);
+                    return;
+                }
 
-            setGames(gamesWithReviews);
+                const res = await fetch("http://localhost:3000/games/batch", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ ids }),
+                });
+                const data = await res.json();
+                const gamesWithReviews = Reviews.map(r => {
+                    const gameData = data.find(g => String(g.id) === String(r.gameId));
+                    return { ...gameData, review: r.review, reviewId: r.reviewId };
+                });
+
+                setGames(gamesWithReviews);
+            } catch (error) {
+                console.error("Failed to load review games:", error);
+                setGames([]);
+            }
         };
 
         if (Reviews?.length > 0) fetchGames();

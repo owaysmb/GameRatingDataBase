@@ -2,9 +2,18 @@ import mongoose from "mongoose";
 
 
 const ForumSchema = new mongoose.Schema({
-  gameId:    { type: mongoose.Schema.Types.ObjectId, ref: 'Game', required: true },
-  name:      { type: String, required: true },
+  userId:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  },
+  Forums:[{
+    type: String,
+    ref: "Forum",
+  }],
+
 }, { timestamps: true })
 
 
-ForumSchema.index({ gameId: 1 })
+
+export default mongoose.model('Forum', ForumSchema)

@@ -11,8 +11,40 @@ export function TextPostCard({post,deletePost}) {
 
     const user = JSON.parse(localStorage.getItem("user"))
     const token = localStorage.getItem("token")
-    const [textPosts, setTextPosts] = useState([]);
-    const { id } = useParams();
+    const [likeCount, setLikeCount] = useState(post?.likes?.length ?? 0);
+    const [dislikeCount, setDislikeCount] = useState(post?.disLikes?.length ?? 0);
+
+    useEffect(() => {
+        setLikeCount(post?.likes?.length ?? 0);
+        setDislikeCount(post?.disLikes?.length ?? 0);
+    }, [post?.likes, post?.disLikes]);
+
+    const handleLike = async (value) => {
+        if (!token || !post?._id) return;
+
+        try {
+            const response = await fetch("http://localhost:3000/post-like", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ postId: post._id, like: value}),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Unable to update post like");
+            }
+
+            setLikeCount(data?.post?.likes?.length ?? likeCount);
+            setDislikeCount(data?.post?.disLikes?.length ?? dislikeCount);
+        } catch (error) {
+            console.error("Like request failed:", error);
+        }
+    };
+
 
     return(
     <div style={{
@@ -49,10 +81,10 @@ export function TextPostCard({post,deletePost}) {
                         <h3 style={{}}>{post.title}</h3>
                         <p style={{color:"grey"}}>{post.text}</p>
                         <div style={{display:"flex",gap:"20px",alignItems:"center"}}>
-                            <ThumbUpIcon />
-                            {post.likes}
-                            <ThumbDownIcon />
-                            {post.disLikes}
+                            <ThumbUpIcon onClick={() => handleLike(true)} />
+                            {likeCount}
+                            <ThumbDownIcon onClick={() => handleLike(false)} />
+                            {dislikeCount}
                             <ShareIcon />
                         </div>
                     </div>

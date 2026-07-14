@@ -8,8 +8,8 @@ const PostSchema = new mongoose.Schema({
   text:      { type: String },
   mediaUrl:  { type: String },
   linkUrl:   { type: String },
-  likes:     { type: Number, default: 0 },
-  disLikes:  { type: Number, default: 0 },
+  likes:     [{type: String }],
+  disLikes:  [{type: String }],
 }, { timestamps: true })
 
 PostSchema.index({ forumId: 1, createdAt: -1 })

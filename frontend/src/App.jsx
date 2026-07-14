@@ -21,6 +21,8 @@ import { TrendingPage } from './Components/HomePage/NavBarPages/TrendingPage';
 import {UpcomingPage} from '../src/Components/HomePage/NavBarPages/UpcomingPage'
 import { ForumMainPage } from './Components/GameForum/ForumMainPage';
 import { CreatePost } from "../src/Components/GameForum/CreatePost";
+import { ProfileEdit } from './Components/Profile/ProfileEdit';
+import { ProfileSettings } from './Components/Profile/ProfileSettings';
 
 
 function App() {
@@ -49,6 +51,8 @@ function App() {
             <Route path='/signup' element={<Signup/>}/>
             <Route path="/game/:id" element={<GameDetails />} /> {/* route this Component whenever the game:id is shown */}
             <Route path='/profile' element={<ProfilePage/>} />
+            <Route path='/profile/edit' element={<ProfileEdit/>}/>
+            <Route path='/profile/settings' element={<ProfileSettings/>}/>
             <Route path='/profile/stats' element={<ProfileStatsPage/>}/>
             <Route path='/top-rated-page' element={<TopRatedPage/>}/>
             <Route path='/new-released-page' element={<NewReleasedPage/>}/>
