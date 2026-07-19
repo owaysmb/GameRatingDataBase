@@ -1,11 +1,11 @@
 import { useParams } from "react-router-dom";
 
-export function DeletePosts() {
+export function DeleteComments() {
     
     const { id } = useParams();
 
-    const handleDelete = async (postID) => {
-        const res = await fetch(`http://localhost:3000/game/${id}/deletepost/${postID}`, {
+    const handleDelete = async (commentID) => {
+        const res = await fetch(`http://localhost:3000/game/${id}/deletecomment/${commentID}`, {
             method: "DELETE",
             credentials: "include"
         });

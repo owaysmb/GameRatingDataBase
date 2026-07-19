@@ -1,20 +1,21 @@
 import { useContext, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from "../../../context/AuthContext";
 
-export function ProfileCover() {
-    const { user, updateUser } = useContext(AuthContext);
+export function ProfileCover({ profileUser, isOwnProfile }) {
+    const { updateUser } = useContext(AuthContext);
     const navigate = useNavigate();
+    const { username } = useParams();
     const fileInputRef = useRef(null);
-    const [preview, setPreview] = useState(user?.profilePicture || "");
+    const [preview, setPreview] = useState(profileUser?.profilePicture || "");
     const [uploading, setUploading] = useState(false);
 
     useEffect(() => {
-        setPreview(user?.profilePicture || "");
-    }, [user?.profilePicture]);
+        setPreview(profileUser?.profilePicture || "");
+    }, [profileUser?.profilePicture]);
 
     const handleAvatarClick = () => {
-        fileInputRef.current?.click();
+        if (isOwnProfile) fileInputRef.current?.click();
     };
 
     const handleFileChange = async (e) => {
@@ -22,16 +23,13 @@ export function ProfileCover() {
         if (!selectedFile) return;
 
         setUploading(true);
-        const token = localStorage.getItem("token");
         const formData = new FormData();
         formData.append('image', selectedFile);
 
         try {
             const response = await fetch('http://localhost:3000/file-upload', {
                 method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+                credentials: 'include',
                 body: formData,
             });
 
@@ -60,13 +58,13 @@ export function ProfileCover() {
         }}>
             <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "24px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "24px", flexWrap: "wrap" }}>
-                    <div style={{ position: "relative", cursor: "pointer" }} onClick={handleAvatarClick}>
-                        <input ref={fileInputRef} type="file" name="image" onChange={handleFileChange} accept="image/*" style={{ display: "none" }} />
+                    <div style={{ position: "relative", cursor: isOwnProfile ? "pointer" : "default" }} onClick={handleAvatarClick}>
+                        {isOwnProfile && <input ref={fileInputRef} type="file" name="image" onChange={handleFileChange} accept="image/*" style={{ display: "none" }} />}
                         {preview ? (
                             <img src={preview} alt="profile" style={{ width: "170px", height: "170px", objectFit: "cover", borderRadius: "50%", border: "3px solid #00d9ff" }} />
                         ) : (
                             <div style={{ width: "170px", height: "170px", borderRadius: "50%", background: "linear-gradient(135deg, #00d9ff, #6b5cff)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "56px", fontWeight: 700 }}>
-                                {user?.username?.charAt(0)?.toUpperCase() || "U"}
+                                {profileUser?.username?.charAt(0)?.toUpperCase() || "U"}
                             </div>
                         )}
                         <div style={{ position: "absolute", inset: 0, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "14px", fontWeight: 600 }}></div>
@@ -74,18 +72,20 @@ export function ProfileCover() {
 
                     <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
                         <div>
-                            <h1 style={{ margin: 0, fontSize: "34px", color: "#f7fbff" }}>{user?.username || "Player"}</h1>
-                            <p style={{ margin: "6px 0 0", color: "#9fb4d6", maxWidth: "520px" }}>{user?.bio || "Add a short bio to tell people more about your taste in games."}</p>
+                            <h1 style={{ margin: 0, fontSize: "34px", color: "#f7fbff" }}>{profileUser?.username || "Player"}</h1>
+                            <p style={{ margin: "6px 0 0", color: "#9fb4d6", maxWidth: "520px" }}>{profileUser?.bio || "Add a short bio to tell people more about your taste in games."}</p>
                         </div>
 
-                        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-                            <button onClick={() => navigate('/profile/settings')} style={{ background: "linear-gradient(135deg, #00d9ff, #6b5cff)", color: "white", border: "none", padding: "10px 16px", borderRadius: "999px", cursor: "pointer", fontWeight: 700 }}>
-                                Settings
-                            </button>
-                            <button onClick={() => navigate('/profile/edit')} style={{ background: "transparent", color: "#00d9ff", border: "1px solid #00d9ff", padding: "10px 16px", borderRadius: "999px", cursor: "pointer", fontWeight: 700 }}>
-                                Edit Profile
-                            </button>
-                        </div>
+                        {isOwnProfile && (
+                            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+                                <button onClick={() => navigate(`/${username}/profile/settings`)} style={{ background: "linear-gradient(135deg, #00d9ff, #6b5cff)", color: "white", border: "none", padding: "10px 16px", borderRadius: "999px", cursor: "pointer", fontWeight: 700 }}>
+                                    Settings
+                                </button>
+                                <button onClick={() => navigate(`/${username}/profile/edit`)} style={{ background: "transparent", color: "#00d9ff", border: "1px solid #00d9ff", padding: "10px 16px", borderRadius: "999px", cursor: "pointer", fontWeight: 700 }}>
+                                    Edit Profile
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
 

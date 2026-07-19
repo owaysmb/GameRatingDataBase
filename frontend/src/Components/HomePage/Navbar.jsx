@@ -186,7 +186,7 @@ function closeNavbar() {
         if(!user){
             navigate("/login")
         }else{
-            navigate("/profile")
+            navigate(`/${user.username}/profile`)
         }
         
     }

@@ -10,15 +10,14 @@ export function TextPost() {
     const { id } = useParams();
     const [title,setTitle] = useState("");
     const [body,setBody] = useState("");
-    const token = localStorage.getItem("token")
     const navigate = useNavigate();
     const handleTextSubmit = async ()=>{
         await fetch(`http://localhost:3000/game/${id}/addtextpost`,{
             method:"POST",
             headers:{
                 "Content-Type":"application/json",
-                Authorization: `Bearer ${token}`
             },
+            credentials: "include",
             body:JSON.stringify({
                 title:title,
                 body:body,

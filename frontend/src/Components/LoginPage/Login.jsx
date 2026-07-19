@@ -1,11 +1,13 @@
-import { useState } from "react"
+import { useState, useContext } from "react"
 import { login } from "../LoginPage/auth"
 import { LoginForm } from "../LoginPage/LoginForm"
 import { useNavigate } from "react-router-dom"
+import { AuthContext } from "../../../context/AuthContext"
 
 export function Login() {
     const navigate = useNavigate();
     const [lockUntil, setLockUntil] = useState(null);
+    const { login: authLogin } = useContext(AuthContext);
 
     const isLocked = lockUntil ? new Date(lockUntil) > new Date() : false;
     const getLockMessage = (expiresAt) => {
@@ -23,13 +25,10 @@ export function Login() {
         }
 
         const res = await login(data)
-        console.log(res)
 
         if (res.message === "Login successful") {
-            localStorage.setItem("user", JSON.stringify(res.user));
-            localStorage.setItem("token", res.token);
-            navigate("/profile")
-            window.location.reload();
+            const userData = await authLogin();
+            navigate(`/${userData.username}/profile`);
             return;
         }
 

@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 function Progress({g,initialProgress}) {
     const [counter,setCounter] = useState(0)
     const FirstRender = useRef(true);
-    const token = localStorage.getItem("token");
 
 
         useEffect(() => {
@@ -27,8 +26,8 @@ function Progress({g,initialProgress}) {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
                 },
+                credentials: "include",
                 body: JSON.stringify({ newProgress: counter, game: g.id })
             });
         }, 800);
@@ -59,13 +58,12 @@ function Progress({g,initialProgress}) {
 
 export function StatsCard({game,stats}) {
     const navigate = useNavigate()
-    const token = localStorage.getItem("token");
     const [progressMap, setProgressMap] = useState({});
 
      useEffect(() => {
         const fetchProgress = async () => {
             const res = await fetch("http://localhost:3000/getprogress", {
-                headers: { Authorization: `Bearer ${token}` }
+                credentials: "include"
             });
             const data = await res.json();
             setProgressMap(data.UserProgress?.Progress ?? {});

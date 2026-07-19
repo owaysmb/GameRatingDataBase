@@ -10,6 +10,7 @@ const PostSchema = new mongoose.Schema({
   linkUrl:   { type: String },
   likes:     [{type: String }],
   disLikes:  [{type: String }],
+  
 }, { timestamps: true })
 
 PostSchema.index({ forumId: 1, createdAt: -1 })

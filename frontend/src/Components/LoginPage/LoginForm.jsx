@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
 export function LoginForm({ onSubmit, disabled, lockMessage }) {
-    const token = localStorage.getItem("token")
     const onFormSubmit = (e) => {
         e.preventDefault();
         if (disabled) {

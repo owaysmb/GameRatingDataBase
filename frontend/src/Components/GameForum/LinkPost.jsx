@@ -10,7 +10,6 @@ export function LinkPost() {
     const [title,setTitle] = useState("");
     const [body,setBody] = useState("");
     const [linkUrl,setLinkUrl] = useState("");
-    const token = localStorage.getItem("token")
     const navigate = useNavigate();
     
     const handleLinkSubmit = async ()=>{
@@ -18,8 +17,8 @@ export function LinkPost() {
             method:"POST",
             headers:{
                 "Content-Type":"application/json",
-                Authorization: `Bearer ${token}`
             },
+            credentials: "include",
             body:JSON.stringify({
                 title:title,
                 linkUrl:linkUrl,

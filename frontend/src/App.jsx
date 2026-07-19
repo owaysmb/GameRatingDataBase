@@ -23,7 +23,7 @@ import { ForumMainPage } from './Components/GameForum/ForumMainPage';
 import { CreatePost } from "../src/Components/GameForum/CreatePost";
 import { ProfileEdit } from './Components/Profile/ProfileEdit';
 import { ProfileSettings } from './Components/Profile/ProfileSettings';
-
+import {Comments} from "./Components/GameForum/PostsComments"
 
 function App() {
 
@@ -50,10 +50,11 @@ function App() {
             <Route path='/login' element={<Login/>}/>
             <Route path='/signup' element={<Signup/>}/>
             <Route path="/game/:id" element={<GameDetails />} /> {/* route this Component whenever the game:id is shown */}
-            <Route path='/profile' element={<ProfilePage/>} />
-            <Route path='/profile/edit' element={<ProfileEdit/>}/>
-            <Route path='/profile/settings' element={<ProfileSettings/>}/>
-            <Route path='/profile/stats' element={<ProfileStatsPage/>}/>
+            <Route path='/:username/profile' element={<ProfilePage/>} />
+            <Route path='/:username/profile/edit' element={<ProfileEdit/>}/>
+            <Route path='/:username/profile/settings' element={<ProfileSettings/>}/>
+            <Route path='/:username/profile/stats' element={<ProfileStatsPage/>}/>
+            
             <Route path='/top-rated-page' element={<TopRatedPage/>}/>
             <Route path='/new-released-page' element={<NewReleasedPage/>}/>
             <Route path='/trending-page' element={<TrendingPage/>}/>
@@ -64,6 +65,7 @@ function App() {
           <Routes>
             <Route path='/game/:id/forum' element={<ForumMainPage/>}/>
             <Route path="/game/:id/forum/create-post" element={<CreatePost />} />
+            <Route path="/game/:id/forum/:id/comments" element={<Comments/>}/>
           </Routes>
             
         </BrowserRouter>

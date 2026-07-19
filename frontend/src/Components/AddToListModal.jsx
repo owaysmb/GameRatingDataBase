@@ -4,7 +4,6 @@ import { useParams } from "react-router-dom";
 export function AddToListModal({close}) {
     const [seleceted,Setselected] = useState([]) 
     const { id } = useParams();
-    const token = localStorage.getItem("token")
     
     const handlecheckbox = (list)=>{
         if(seleceted.includes(list)){
@@ -19,8 +18,8 @@ export function AddToListModal({close}) {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`
             },
+            credentials: "include",
             body: JSON.stringify({ status: seleceted })
   });
         close()

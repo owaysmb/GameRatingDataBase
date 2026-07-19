@@ -1,16 +1,19 @@
 import { useParams ,useNavigate} from "react-router-dom";
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useState, useContext } from "react";
 import { CreatePost } from "../GameForum/CreatePost";
 import { TextPostCard } from "../GameForum/TextPostCard";
 import { LinkPostCard } from "../GameForum/LinkPostCard";
 import { MediaPostCard } from "../GameForum/MediaPostCard";
 import { DeletePosts } from './DeletePosts';
+import { Pagination } from "../Pagination";
+import { AuthContext } from "../../../context/AuthContext";
 
 const getImageUrl = (imageId, size) =>
   `https://images.igdb.com/igdb/image/upload/t_${size}/${imageId}.jpg`;
 
 export function ForumMainPage() {
 
+  const { user } = useContext(AuthContext);
   const { id } = useParams();
   const navigate = useNavigate();
   const [game, setGame] = useState(null);
@@ -18,6 +21,11 @@ export function ForumMainPage() {
   const [posts, setPosts] = useState([]);
   const [forum, setForum] = useState(null);
   const [ForumButtonClicked, setForumButtonClicked] = useState(false);
+  const [currentPage , setCurrentPage] = useState(1);
+  const [postPerPage,serPostPerPage] = useState(10)
+  const lastPostIndex = currentPage * postPerPage;
+  const firstPostIndex = lastPostIndex - postPerPage;
+
 
   const deletePost = DeletePosts();
 
@@ -39,15 +47,17 @@ export function ForumMainPage() {
 
   useEffect(() => {
     fetch(`http://localhost:3000/game/${id}/getposts`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`
-      }
+      credentials: "include"
     })
     .then(res => res.json())
     .then(data => setPosts(data))
   }, [id])
 
   const toggleForumMembership = async () => {
+    if (!user) {
+      alert("Please log in to join the forum.");
+      return;
+    }
     const nextValue = !ForumButtonClicked;
     setForumButtonClicked(nextValue);
 
@@ -56,8 +66,8 @@ export function ForumMainPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`
         },
+        credentials: "include",
         body: JSON.stringify({ gameId: id, forumJoined: nextValue })
       });
 
@@ -76,15 +86,13 @@ export function ForumMainPage() {
   };
 
 
-
+  const currentPosts = posts.slice(firstPostIndex,lastPostIndex);
 
   useEffect(() => {
     const fetchForum = async () => {
       try {
         const res = await fetch(`http://localhost:3000/game/${id}/get-forum`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`
-          }
+          credentials: "include"
         });
 
         if (!res.ok) {
@@ -204,17 +212,24 @@ export function ForumMainPage() {
         <button style={ForumButtonClicked ? ForumButtonStyle : buttonstyle} onClick={toggleForumMembership}>
           {ForumButtonClicked ? "Joined" : "Join Forum"}
         </button>
-        <button style={buttonstyle} onClick={() => navigate(`/game/${id}/forum/create-post`)}>
-          Create Post
-        </button>
+        {user ? (
+          <button style={buttonstyle} onClick={() => navigate(`/game/${id}/forum/create-post`)}>
+            Create Post
+          </button>
+        ) : (
+          <button style={{...buttonstyle, opacity: 0.5, cursor: "not-allowed"}} onClick={() => alert("Please log in to create a post.")}>
+            Create Post
+          </button>
+        )}
       </div>
       <br />
-      {posts.map(post => {
+      {currentPosts.map(post => {
         if (post.type === "text") return <TextPostCard key={post._id} post={post} deletePost={deletePost} />
         if (post.type === "link") return <LinkPostCard key={post._id} post={post} deletePost={deletePost} />
         if (post.type === "media") return <MediaPostCard key={post._id} post={post} deletePost={deletePost} />
       })}
 
+      <Pagination totalPosts={posts.length} postPerPage={postPerPage} setCurrentPage={setCurrentPage}/>
 
     </>
   );

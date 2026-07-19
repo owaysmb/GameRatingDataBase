@@ -1,25 +1,19 @@
 import { useState } from 'react';
 import { useEffect } from 'react';
-import { useContext } from 'react';
-import { AuthContext } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { MdDelete } from "react-icons/md";
-import { DeleteReviews } from './ProfileStatsPage/DeleteReview';
+import { DeleteReviews } from './DeleteReview';
 
-export function ProfileReviews() {
-    const token = localStorage.getItem("token");
+export function ProfileReviews({ profileUser, isOwnProfile }) {
     const [Reviews, SetReviews] = useState([]);
     const [game, setGames] = useState([]);
-    const { user } = useContext(AuthContext);
     const navigate = useNavigate();
     const deleteReview = DeleteReviews();
 
     const fetchReviews = async () => {
         try {
-            const resReviews = await fetch("http://localhost:3000/getreview", {
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
+            const resReviews = await fetch(`http://localhost:3000/getreview?userId=${profileUser._id}`, {
+                credentials: "include"
             });
             const data = await resReviews.json();
             const reviews = Array.isArray(data.reviews) ? data.reviews : [];
@@ -36,7 +30,7 @@ export function ProfileReviews() {
 
     useEffect(() => {
         fetchReviews();
-    }, []);
+    }, [profileUser._id]);
 
     useEffect(() => {
         const fetchGames = async () => {
@@ -51,8 +45,8 @@ export function ProfileReviews() {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
                     },
+                    credentials: "include",
                     body: JSON.stringify({ ids }),
                 });
                 const data = await res.json();
@@ -79,7 +73,7 @@ export function ProfileReviews() {
     };
     return (
         <>
-            <h1>{user?.username}'s Reviews : </h1>
+            <h1>{profileUser?.username}'s Reviews : </h1>
 
             <div style={{display:"flex",gap:"20px",padding:"30px",backgroundColor:"#111",borderRadius:"20px",justifyContent:"space-around",textAlign:"center",flexWrap:"wrap"}}>
                 {game?.map(g => (

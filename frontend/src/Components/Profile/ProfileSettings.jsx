@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 export function ProfileSettings() {
     const navigate = useNavigate();
+    const { username } = useParams();
     const [settings, setSettings] = useState({
         privateProfile: false,
         emailUpdates: true,
@@ -59,10 +60,10 @@ export function ProfileSettings() {
                     </div>
 
                     <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '8px' }}>
-                        <button onClick={() => navigate('/profile/edit')} style={{ background: 'linear-gradient(135deg, #00d9ff, #6b5cff)', color: 'white', border: 'none', padding: '12px 18px', borderRadius: '999px', cursor: 'pointer', fontWeight: 700 }}>
+                        <button onClick={() => navigate(`/${username}/profile/edit`)} style={{ background: 'linear-gradient(135deg, #00d9ff, #6b5cff)', color: 'white', border: 'none', padding: '12px 18px', borderRadius: '999px', cursor: 'pointer', fontWeight: 700 }}>
                             Edit profile
                         </button>
-                        <button onClick={() => navigate('/profile')} style={{ background: 'transparent', color: '#00d9ff', border: '1px solid #00d9ff', padding: '12px 18px', borderRadius: '999px', cursor: 'pointer', fontWeight: 700 }}>
+                        <button onClick={() => navigate(`/${username}/profile`)} style={{ background: 'transparent', color: '#00d9ff', border: '1px solid #00d9ff', padding: '12px 18px', borderRadius: '999px', cursor: 'pointer', fontWeight: 700 }}>
                             Back to profile
                         </button>
                     </div>

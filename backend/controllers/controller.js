@@ -14,6 +14,7 @@ import ProgressSchema from "../models/Progress.js";
 import Progress from "../models/Progress.js";
 import  Post  from '../models/Posts.js';
 import Forum from "../models/Forum.js";
+import PostComments from "../models/PostComments.js";
 
 // Cloudniary imports   
 import multer from 'multer'
@@ -88,7 +89,15 @@ export const login = async (req,res)=>{
             process.env.ACCESS_TOKEN_SECRET,
             { expiresIn: "30d" })
         
-        res.json({ message: "Login successful" ,user,token})
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: false,
+            sameSite: "lax",
+            maxAge: 30 * 24 * 60 * 60 * 1000
+        })
+
+        const { password: _, ...userWithoutPassword } = user.toObject()
+        res.json({ message: "Login successful", user: userWithoutPassword })
 
     } catch (err) {
         console.log(err)
@@ -120,9 +129,10 @@ export const signup = async (req, res) => {
         })
 
         const savedUser = await newUser.save()
+        const { password: _, ...userWithoutPassword } = savedUser.toObject()
         res.status(201).json({
             message: "Signup successful",
-            user: savedUser
+            user: userWithoutPassword
         })
         
     } catch (err) {
@@ -130,6 +140,26 @@ export const signup = async (req, res) => {
         res.status(500).json({ message: "Server error" })
     }
 }
+
+
+export const ProfileByUser = async (req, res) => {
+    try {
+        const username = req.params.username;
+
+        const findUser = await userSchema.findOne({ username }).select('-password');
+
+        if (!findUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.json(findUser);
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
 
 export const updateUserProfile = async (req, res) => {
     try {
@@ -277,12 +307,13 @@ for (const key of Object.keys(userRating.rating.value)) {
 
 export const getStats = async (req, res) => {
     try {
-        if (!req.user?.id) {
+        const userId = req.query.userId || req.user?.id;
+        if (!userId) {
             return res.status(401).json({ message: "User not authenticated" });
         }
 
-        const userId = new mongoose.Types.ObjectId(req.user.id);
-        const list = await cache(`list:all:${userId}`, () => ListsSchema.findOne({ userId }));
+        const objectId = new mongoose.Types.ObjectId(userId);
+        const list = await cache(`list:all:${objectId}`, () => ListsSchema.findOne({ userId: objectId }));
 
         if (!list) {
             return res.json({
@@ -335,11 +366,12 @@ export const addFavortie = async (req,res)=>{
 
 export const GetFavorite = async (req,res)=>{
     try {
-        if (!req.user?.id) {
+        const userId = req.query.userId || req.user?.id;
+        if (!userId) {
             return res.status(401).json({ message: "User not authenticated" });
         }
 
-    let fav = await cache(`favorite:${req.user.id}`, () => FavoriteSchema.findOne({userId:req.user.id}));    
+    let fav = await cache(`favorite:${userId}`, () => FavoriteSchema.findOne({userId}));    
     res.json(fav)
     
     } catch (err) {
@@ -407,10 +439,11 @@ export const addProgress = async (req,res)=>{
 export const GetProgress =  async (req,res)=>{
     try {
         
-        if (!req.user?.id) {
+        const userId = req.query.userId || req.user?.id;
+        if (!userId) {
             return res.status(401).json({ message: "User not authenticated" });
         }
-        let UserProgress = await  cache(`progress:${req.user.id}`, () => ProgressSchema.findOne({userId:req.user.id}));
+        let UserProgress = await  cache(`progress:${userId}`, () => ProgressSchema.findOne({userId}));
         
         res.json({UserProgress}); 
 
@@ -450,12 +483,13 @@ export const AddReview = async (req,res)=>{
 
 export const GetReview = async (req,res)=>{
     try {
-        if (!req.user?.id) {
+        const userId = req.query.userId || req.user?.id;
+        if (!userId) {
             return res.status(401).json({ message: "User not authenticated" });
         }
 
-        const userId = new mongoose.Types.ObjectId(req.user.id);
-        const UserReview = await cache(`review:all:${req.user.id}`, () => ReviewsSchema.findOne({ userId }));
+        const objectId = new mongoose.Types.ObjectId(userId);
+        const UserReview = await cache(`review:all:${userId}`, () => ReviewsSchema.findOne({ userId: objectId }));
 
         if (!UserReview) {
             return res.json({ reviews: [] });
@@ -534,7 +568,6 @@ export const AddLinkPost = async (req, res) => {
 
 export const GetAllPosts = async (req, res) => {
   try {
-    const userId = new mongoose.Types.ObjectId(req.user.id);
     const gameId = req.params.id;
     const posts = await cache(`posts:${gameId}`, () => Post.find({ forumId: gameId })
             .populate('userId', 'username')
@@ -669,12 +702,16 @@ export const joinForum = async(req,res)=>{
 
 export const getForum = async(req,res)=>{
     try {
-        const userId = new mongoose.Types.ObjectId(req.user.id);
+        const userId = req.user?.id;
+
+        if (!userId) {
+            return res.json({ forum: null });
+        }
 
         let forum = await cache(`forum:${userId}`, () => Forum.findOne({ userId }));
 
         if (!forum) {
-            return res.status(404).json({ message: "Forum not found" });
+            return res.json({ forum: null });
         }
 
         res.json({ forum });
@@ -780,5 +817,173 @@ export const handleImageUpload = async (req, res) => {
     } catch (error) {
         console.error("Image upload error:", error);
         return res.status(500).json({ message: "Server error" });
+    }
+}
+
+export const handleComment = async(req,res)=>{
+    try {
+        const userId = req.user?.id;
+        const postId = req.body.postID;
+        const text = req.body.comment;
+        const forumId = req.body.forumId;
+        if (!userId) {
+            return res.status(401).json({ message: "User not authenticated" });
+        }
+        
+        const comment = new PostComments({
+            userId,
+            postId,
+            text,
+            forumId
+        })
+
+        await comment.save();
+        res.json({message:"sent succesfully"})
+
+    } catch (err) {
+        console.log(err);
+    }
+
+
+}
+
+
+export const GetComment = async (req,res) =>{
+
+    try {
+        
+        const postId = req.params.postId;
+
+        const comments = await PostComments.find({postId})
+            .populate('userId', 'username')
+            .sort({ createdAt: -1 })
+            .limit(20);
+        res.json(comments)
+
+    } catch (err) {
+        console.log(err);
+        res.status(500);
+    }   
+    
+    
+    
+
+}
+
+
+export const DeleteComment = async (req,res)=>{
+
+    try {
+        const userId = req.user.id;
+        const commentId = req.params.commentID;
+
+        const comment = await PostComments.find()
+
+        if (!comment) {
+                return res.status(404).json({ message: "Post not found" });
+            }
+
+        await PostComments.findByIdAndDelete(commentId);
+        res.json({ message: "Comment deleted successfully" });        
+    } catch (err) {
+        console.log(err);
+    }
+    
+}
+
+export const handleCommentLike = async (req, res) => {
+    try {
+        const userId = req.user?.id?.toString();
+        const { commentId, like } = req.body;
+
+        if (!userId) {
+            return res.status(401).json({ message: "User not authenticated" });
+        }
+
+        if (!commentId) {
+            return res.status(400).json({ message: "Comment ID is required" });
+        }
+
+        if (typeof like !== "boolean") {
+            return res.status(400).json({ message: "Like value is required" });
+        }
+
+        const comment = await PostComments.findById(commentId);
+
+        if (!comment) {
+            return res.status(404).json({ message: "Comment not found" });
+        }
+
+        const hasLiked = (comment.likes || []).includes(userId);
+        const hasDisliked = (comment.disLikes || []).includes(userId);
+
+        let update = {};
+
+        if (like) {
+            if (hasLiked) {
+                update = { $pull: { likes: userId } };
+            } else {
+                update = {
+                    $addToSet: { likes: userId },
+                    $pull: { disLikes: userId }
+                };
+            }
+        } else {
+            if (hasDisliked) {
+                update = { $pull: { disLikes: userId } };
+            } else {
+                update = {
+                    $addToSet: { disLikes: userId },
+                    $pull: { likes: userId }
+                };
+            }
+        }
+
+        const updatedComment = await PostComments.findByIdAndUpdate(commentId, update, { new: true });
+
+        return res.json({ message: "Comment updated successfully", comment: updatedComment });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ message: "Server error" });
+    }
+}
+
+export const logout = async (req, res) => {
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax"
+    });
+    res.json({ message: "Logged out successfully" });
+}
+
+export const getMe = async (req, res) => {
+    try {
+        const user = await userSchema.findById(req.user.id).select('-password');
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        res.json({ user });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Server error" });
+    }
+}
+
+export const getForumsByUsername = async (req, res) => {
+    try {
+        const username = req.params.username;
+        const user = await userSchema.findOne({ username }).select('_id');
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        const forum = await Forum.findOne({ userId: user._id });
+        if (!forum) {
+            return res.json({ forums: [] });
+        }
+        res.json({ forums: forum.Forums });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Server error" });
     }
 }

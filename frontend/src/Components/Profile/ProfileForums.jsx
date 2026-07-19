@@ -1,22 +1,16 @@
-import { useEffect, useState, useContext } from 'react';
-import { AuthContext } from "../../../context/AuthContext";
-import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from 'react';
+import { useNavigate } from "react-router-dom";
 
-export function ProfileForums() {
+export function ProfileForums({ profileUser, isOwnProfile }) {
     const navigate = useNavigate();
-    const token = localStorage.getItem("token");
     const [forumIds, setForumIds] = useState([]);
     const [games, setGames] = useState([]);
-    const { user } = useContext(AuthContext);
-    const {id} = useParams();
 
     useEffect(() => {
         const fetchForums = async () => {
             try {
-                const res = await fetch(`http://localhost:3000/game/${id}/get-forum`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
+                const res = await fetch(`http://localhost:3000/profile/${profileUser.username}/forums`, {
+                    credentials: "include"
                 });
 
                 if (!res.ok) {
@@ -25,27 +19,29 @@ export function ProfileForums() {
                 }
 
                 const data = await res.json();
-                const ids = data.forum?.Forums || [];
-                setForumIds(ids);
+                setForumIds(data.forums || []);
             } catch (err) {
                 console.error("Forum fetch error", err);
             }
         };
 
         fetchForums();
-    }, [token]);
+    }, [profileUser.username]);
 
     useEffect(() => {
         const fetchGames = async () => {
-            if (!forumIds.length) return;
+            if (!forumIds.length) {
+                setGames([]);
+                return;
+            }
 
             try {
                 const res = await fetch("http://localhost:3000/games/batch", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
                     },
+                    credentials: "include",
                     body: JSON.stringify({ ids: forumIds }),
                 });
 
@@ -62,11 +58,11 @@ export function ProfileForums() {
         };
 
         fetchGames();
-    }, [forumIds, token]);
+    }, [forumIds]);
 
     return (
         <>
-            <h1>{user?.username}'s Forums:</h1>
+            <h1>{profileUser?.username}'s Forums:</h1>
 
             <div style={{display:"flex",gap:"20px",padding:"30px",backgroundColor:"#111",borderRadius:"20px",justifyContent:"space-around",textAlign:"center",flexWrap:"wrap"}}>
                 {games.length === 0 ? (

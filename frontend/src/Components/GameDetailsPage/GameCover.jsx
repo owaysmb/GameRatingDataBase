@@ -14,7 +14,6 @@ import { FaStar } from "react-icons/fa6";
 export function GameCoverAndTrailer({game}) {
 
     const [starValue,SetstarValue] = useState(null);
-    const token = localStorage.getItem("token");
     const {id} = useParams();
     const [favorite,setFavorite] = useState(false);
     const [Fav,SetFav] = useState([])
@@ -25,8 +24,8 @@ export function GameCoverAndTrailer({game}) {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
                 },
+                credentials: "include",
                 body: JSON.stringify({ rating: starValue })
             });
             console.log("done rating by fetch")
@@ -50,8 +49,8 @@ export function GameCoverAndTrailer({game}) {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`
             },
+            credentials: "include",
             body: JSON.stringify({ favorite: newFavorite })
         });
     };
@@ -59,7 +58,7 @@ export function GameCoverAndTrailer({game}) {
     useEffect(() => {
         const fetchFav = async () => {
             const resFav = await fetch("http://localhost:3000/getfavorite", {
-                headers: { Authorization: `Bearer ${token}` }
+                credentials: "include"
             });
             const FavData = await resFav.json();
             const favList = FavData.Favorites ?? [];
@@ -73,7 +72,7 @@ export function GameCoverAndTrailer({game}) {
 useEffect(() => {
     const fetchRating = async () => {
         const res = await fetch(`http://localhost:3000/game/${id}/getrating`, {
-            headers: { Authorization: `Bearer ${token}` }
+            credentials: "include"
         });
         const data = await res.json();
         SetstarValue(data.rating);

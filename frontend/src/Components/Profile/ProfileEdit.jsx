@@ -1,10 +1,11 @@
 import { useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from '../../../context/AuthContext';
 
 export function ProfileEdit() {
     const { user, updateUser } = useContext(AuthContext);
     const navigate = useNavigate();
+    const { username } = useParams();
     const [formData, setFormData] = useState({ username: '', bio: '' });
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
@@ -27,7 +28,6 @@ export function ProfileEdit() {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        const token = localStorage.getItem('token');
         const formData = new FormData();
         formData.append('image', file);
 
@@ -35,7 +35,7 @@ export function ProfileEdit() {
         try {
             const response = await fetch('http://localhost:3000/file-upload', {
                 method: 'POST',
-                headers: { Authorization: `Bearer ${token}` },
+                credentials: 'include',
                 body: formData,
             });
 
@@ -62,13 +62,12 @@ export function ProfileEdit() {
         setMessage('');
 
         try {
-            const token = localStorage.getItem('token');
             const response = await fetch('http://localhost:3000/profile/update', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
                 },
+                credentials: 'include',
                 body: JSON.stringify({
                     username: formData.username,
                     bio: formData.bio,
@@ -79,7 +78,7 @@ export function ProfileEdit() {
             if (response.ok && result.user) {
                 updateUser(result.user);
                 setMessage('Profile updated successfully');
-                setTimeout(() => navigate('/profile'), 800);
+                setTimeout(() => navigate(`/${result.user.username}/profile`), 800);
             } else {
                 setMessage(result.message || 'Unable to update profile');
             }
@@ -151,7 +150,7 @@ export function ProfileEdit() {
                             <button type="submit" disabled={loading} style={{ background: 'linear-gradient(135deg, #00d9ff, #6b5cff)', color: 'white', border: 'none', padding: '12px 18px', borderRadius: '999px', cursor: 'pointer', fontWeight: 700 }}>
                                 {loading ? 'Saving...' : 'Save changes'}
                             </button>
-                            <button type="button" onClick={() => navigate('/profile')} style={{ background: 'transparent', color: '#00d9ff', border: '1px solid #00d9ff', padding: '12px 18px', borderRadius: '999px', cursor: 'pointer', fontWeight: 700 }}>
+                            <button type="button" onClick={() => navigate(`/${username}/profile`)} style={{ background: 'transparent', color: '#00d9ff', border: '1px solid #00d9ff', padding: '12px 18px', borderRadius: '999px', cursor: 'pointer', fontWeight: 700 }}>
                                 Cancel
                             </button>
                         </div>

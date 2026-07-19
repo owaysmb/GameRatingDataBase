@@ -4,15 +4,14 @@ import { useParams } from "react-router-dom";
 export function GameReviewModal({close}) {
     const [review, setReview] = useState("")
     const { id } = useParams();
-    const token = localStorage.getItem("token")
 
     const handlesave = async ()=>{
         await fetch(`http://localhost:3000/game/${id}/addreview`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`
             },
+            credentials: "include",
             body: JSON.stringify({ review: review })
   });
         close()

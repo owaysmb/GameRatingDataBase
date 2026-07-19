@@ -4,7 +4,6 @@ import { Loading } from '../../Loading';
 import { StatsCard } from './StatsCard';
 
 export function StatsStructure({link}) {
-    const token = localStorage.getItem("token");
     const [stats,SetStats] = useState(0);
     const [game, setGames] = useState([])
     const [loading, setLoading] = useState(true);
@@ -21,9 +20,7 @@ export function StatsStructure({link}) {
     useEffect(()=>{
             const fetchStats = async ()=>{
                     const res = await fetch("http://localhost:3000/getstats",{
-                        headers:{
-                            Authorization:`Bearer ${token}`
-                        }
+                        credentials: "include"
                     });
     
                     const statsData = await res.json();
@@ -49,8 +46,8 @@ useEffect(() => {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
             },
+            credentials: "include",
             body: JSON.stringify({ ids }),
         });
 

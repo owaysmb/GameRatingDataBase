@@ -4,41 +4,57 @@ export const AuthContext = createContext();
 
 export function AuthProvider({children}) {
     const [ user,SetUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(()=>{
-        const savedUser = localStorage.getItem("user")
-        if(savedUser){
-           SetUser(JSON.parse(savedUser)); 
-        }
-        
+        const fetchUser = async () => {
+            try {
+                const res = await fetch("http://localhost:3000/me", {
+                    credentials: "include"
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    SetUser(data.user);
+                }
+            } catch (err) {
+                console.log("Not authenticated");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchUser();
     },[]);
 
-    const login = (userData,token) =>{
-        localStorage.setItem("user",JSON.stringify(userData))
-        localStorage.setItem("token",token);
-        SetUser(userData)
-        
+    const login = async () =>{
+        const res = await fetch("http://localhost:3000/me", {
+            credentials: "include"
+        });
+        if (res.ok) {
+            const data = await res.json();
+            SetUser(data.user);
+            return data.user;
+        }
+        return null;
     }
 
     const updateUser = (updatedUser) => {
         SetUser(updatedUser);
-
-        if (updatedUser) {
-            localStorage.setItem("user", JSON.stringify(updatedUser));
-        } else {
-            localStorage.removeItem("user");
-            localStorage.removeItem("token");
-        }
     }
 
-    const logout = ()=>{
-        localStorage.removeItem("user")
-        localStorage.removeItem("token")
+    const logout = async ()=>{
+        try {
+            await fetch("http://localhost:3000/logout", {
+                method: "POST",
+                credentials: "include"
+            });
+        } catch (err) {
+            console.log("Logout error:", err);
+        }
         SetUser(null);
     }
 
     return(
-        <AuthContext.Provider value={{user,login,logout,updateUser}}>
+        <AuthContext.Provider value={{user,login,logout,updateUser,loading}}>
             {children}
         </AuthContext.Provider>
     )

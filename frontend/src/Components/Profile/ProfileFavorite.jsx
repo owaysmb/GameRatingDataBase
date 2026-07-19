@@ -1,28 +1,22 @@
 import { useState } from 'react';
 import { useEffect } from 'react';
-import { useContext } from 'react';
-import { AuthContext } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-export function ProfileFavorite() {
-    const token = localStorage.getItem("token");
+export function ProfileFavorite({ profileUser, isOwnProfile }) {
     const [Fav,SetFav] = useState([])
     const [game, setGames] = useState([]);
-    const { user, logout } = useContext(AuthContext);
     const navigate = useNavigate()
 
     useEffect(()=>{
             const fetchFav = async ()=>{
-                const resFav = await fetch("http://localhost:3000/getfavorite",{
-                    headers:{
-                        Authorization:`Bearer ${token}`
-                    }
+                const resFav = await fetch(`http://localhost:3000/getfavorite?userId=${profileUser._id}`,{
+                    credentials: "include"
                 });
                 const FavData = await resFav.json();
                 SetFav(FavData.Favorites); 
             }
             fetchFav();
-          },[])  
+          },[profileUser._id])  
 
           console.log(Fav)
         
@@ -32,8 +26,8 @@ export function ProfileFavorite() {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
                     },
+                    credentials: "include",
                     body: JSON.stringify({ ids: Fav }),
                 });
                 const data = await res.json();
@@ -52,7 +46,7 @@ export function ProfileFavorite() {
 
     return(
     <>
-     <h1>{user?.username}'s Favorites : </h1>
+     <h1>{profileUser?.username}'s Favorites : </h1>
             <div style={{display:"flex",gap:"20px",padding:"30px",backgroundColor:"#111",borderRadius:"20px",justifyContent:"space-around",textAlign:"center",overflow:"hidden"}}>
                     {game?.map((g) => {
                     return (

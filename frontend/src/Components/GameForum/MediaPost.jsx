@@ -24,9 +24,7 @@ export function MediaPost() {
 
         await fetch(`http://localhost:3000/game/${id}/addmediapost`, {
             method: "POST",
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`
-            },
+            credentials: "include",
             body: formData
         });
         navigate(`/game/${id}/forum`);
