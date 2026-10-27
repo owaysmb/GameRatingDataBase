@@ -235,8 +235,10 @@ app.get("/game/:id", async (req, res) => {
     const { id } = req.params;
 
     const igdb = new IGDBService();
+    const cacheKey = `page:game:${id}`;
 
-    const games = await cache(`igdb:game:${id}`, () => igdb.FetchRes(`
+    const pageData = await cache(cacheKey, async () => {
+      const games = await igdb.FetchRes(`
         where id = ${id};
         fields      name,
                     rating,
@@ -259,62 +261,62 @@ app.get("/game/:id", async (req, res) => {
                     similar_games,
                     artworks.image_id
 ;
-      `));
-    const game = games[0];
-    if (!game) {
-      return res.status(404).json({ error: "Game not found" });
-    }
-    let trailer = null;
+      `);
+      const game = games[0];
+      if (!game) {
+        throw new Error("Game not found");
+      }
+      let trailer = null;
 
-    if (game.videos?.length) {
-    const trailerVideo = game.videos[0];
-    trailer = `https://www.youtube.com/embed/${trailerVideo.video_id}`;
-    }
+      if (game.videos?.length) {
+        const trailerVideo = game.videos[0];
+        trailer = `https://www.youtube.com/embed/${trailerVideo.video_id}`;
+      }
 
-    const cover = game.cover?.url
-    ? `https:${game.cover.url.replace("t_thumb", "t_cover_big")}`
-    : null;
+      const cover = game.cover?.url
+        ? `https:${game.cover.url.replace("t_thumb", "t_cover_big")}`
+        : null;
 
-    const release_date = game.first_release_date
-    ? new Date(game.first_release_date * 1000).toDateString()
-    : null;
+      const release_date = game.first_release_date
+        ? new Date(game.first_release_date * 1000).toDateString()
+        : null;
 
-    const screenshots = []
-    if(game.screenshots?.length){
-        game.screenshots.map(sc =>(
-        screenshots.push(sc)
+      const screenshots = []
+      if (game.screenshots?.length) {
+        game.screenshots.map(sc => (
+          screenshots.push(sc)
         ))
-    }
+      }
 
-    const ttbRes = await fetch("https://api.igdb.com/v4/game_time_to_beats", {
+      const ttbRes = await fetch("https://api.igdb.com/v4/game_time_to_beats", {
         method: "POST",
         headers: {
-            "Client-ID": process.env.TWITCH_CLIENT_ID,
-            "Authorization": `Bearer ${await getAccessToken()}`,
-            "Content-Type": "text/plain",
+          "Client-ID": process.env.TWITCH_CLIENT_ID,
+          "Authorization": `Bearer ${await getAccessToken()}`,
+          "Content-Type": "text/plain",
         },
         body: `where game_id = ${id}; fields hastily, normally, completely;`,
-    });
+      });
 
-    const ttbData = await ttbRes.json();
-    const ttb = ttbData[0];
+      const ttbData = await ttbRes.json();
+      const ttb = ttbData[0];
 
-    const timeToBeat = ttb ? {
-        hastily:    ttb.hastily    ? Math.round(ttb.hastily / 3600)    : null,
-        normally:   ttb.normally   ? Math.round(ttb.normally / 3600)   : null,
+      const timeToBeat = ttb ? {
+        hastily: ttb.hastily ? Math.round(ttb.hastily / 3600) : null,
+        normally: ttb.normally ? Math.round(ttb.normally / 3600) : null,
         completely: ttb.completely ? Math.round(ttb.completely / 3600) : null,
-    } : null;
+      } : null;
 
-    let similarGames = [];
-        if(game.similar_games?.length){
+      let similarGames = [];
+      if (game.similar_games?.length) {
         const similarRes = new IGDBService()
         similarGames = await similarRes.FetchRes(`
-            where id = (${game.similar_games.slice(0, 6).join(",")});
-            fields name, cover.url, rating;
+          where id = (${game.similar_games.slice(0, 6).join(",")});
+          fields name, cover.url, rating;
         `);
-        }
+      }
 
-        res.json({
+      return {
         ...game,
         cover,
         trailer,
@@ -322,8 +324,18 @@ app.get("/game/:id", async (req, res) => {
         timeToBeat,
         screenshots,
         similarGames
-        });
+      };
+    }, 3600);
+
+    if (!pageData) {
+      return res.status(404).json({ error: "Game not found" });
+    }
+
+    res.json(pageData);
   } catch (err) {
+    if (err.message === "Game not found") {
+      return res.status(404).json({ error: "Game not found" });
+    }
     res.status(500).json({ error: "Failed to fetch game" });
   }
 });

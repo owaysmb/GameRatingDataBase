@@ -396,8 +396,8 @@ export const GetFavorite = async (req,res)=>{
             return res.status(401).json({ message: "User not authenticated" });
         }
 
-    let fav = await cache(`favorite:${userId}`, () => FavoriteSchema.findOne({userId}));    
-    res.json(fav)
+        let fav = await cache(`favorite:${userId}`, () => FavoriteSchema.findOne({userId}));    
+        res.json(fav)
     
     } catch (err) {
         console.log(err)
@@ -416,9 +416,9 @@ export const GetRating = async (req,res)=>{
         let rate = await cache(`rating:${req.user.id}:${gameId}`, () => RatingsSchema.findOne({userId:req.user.id}));    
         const RateMap  = {one:1 , two:2,three:3 , four: 4 , five : 5}
 
-            for (const [k,v] of Object.entries(RateMap)) {
-                if( rate.rating.value[k]?.includes(gameId) ) return res.json({ rating: v });
-            }
+        for (const [k,v] of Object.entries(RateMap)) {
+            if( rate.rating.value[k]?.includes(gameId) ) return res.json({ rating: v });
+        }
         res.json({rating:null});
 
     
