@@ -30,7 +30,8 @@ import {
     logout,
     getMe,
     getForumsByUsername,
-    handleCommentLike
+    handleCommentLike,
+    SearchUsers
     } from "../controllers/controller.js";
 
 import {AuthMiddleware} from "../middleware/authMiddleware.js"
@@ -44,6 +45,7 @@ const router = express.Router();
 // Public routes - no auth required
 router.post("/login", login);
 router.post("/signup", signup);
+router.get("/users/search", SearchUsers);
 router.get("/profile/:username", ProfileByUser)
 router.get("/profile/:username/forums", getForumsByUsername)
 router.get("/getstats", getStats);

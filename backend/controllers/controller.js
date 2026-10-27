@@ -142,6 +142,31 @@ export const signup = async (req, res) => {
 }
 
 
+export const SearchUsers = async (req, res) => {
+    try {
+        const { q } = req.query;
+
+        if (!q || q.trim().length === 0) {
+            return res.json([]);
+        }
+
+        const users = await userSchema.find({
+            username: {
+                $regex: `^${q.trim()}`,
+                $options: "i"
+            }
+        })
+        .select("-password")
+        .limit(20);
+
+        res.json(users);
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
 export const ProfileByUser = async (req, res) => {
     try {
         const username = req.params.username;

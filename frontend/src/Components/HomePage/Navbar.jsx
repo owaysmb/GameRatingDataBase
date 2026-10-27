@@ -150,7 +150,7 @@ function closeNavbar() {
         <ul style={{display:"grid",gap:"10px"}}> 
             <h2>Community</h2>
             <li style={ListStyle} >Forums</li>
-            <li style={ListStyle} >Users</li>
+            <li onClick={()=> {navigate("/users"); closeNavbar()}} style={ListStyle} >Users</li>
         </ul>
         {/* Help */}
         <ul style={{display:"grid",gap:"10px"}}> 

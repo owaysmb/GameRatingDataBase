@@ -19,6 +19,7 @@ import { TopRatedPage } from '../src/Components/HomePage/NavBarPages/TopRatedPag
 import { NewReleasedPage } from './Components/HomePage/NavBarPages/NewRealesedPage';
 import { TrendingPage } from './Components/HomePage/NavBarPages/TrendingPage';
 import {UpcomingPage} from '../src/Components/HomePage/NavBarPages/UpcomingPage'
+import {UsersPage} from './Components/HomePage/NavBarPages/UsersPage'
 import { ForumMainPage } from './Components/GameForum/ForumMainPage';
 import { CreatePost } from "../src/Components/GameForum/CreatePost";
 import { ProfileEdit } from './Components/Profile/ProfileEdit';
@@ -59,6 +60,7 @@ function App() {
             <Route path='/new-released-page' element={<NewReleasedPage/>}/>
             <Route path='/trending-page' element={<TrendingPage/>}/>
             <Route path='/Upcoming-page' element={<UpcomingPage/>}/>
+            <Route path='/users' element={<UsersPage/>}/>
             
           </Routes>
           
