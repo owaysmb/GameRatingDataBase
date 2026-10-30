@@ -19,7 +19,7 @@ export function Filters(){
 
 
 
-    <div style={{display:"flex",gap:"20px",alignItems:"center",justifyContent:"end",paddingTop:"100px"}}> 
+    <div style={{display:"flex",gap:"20px",alignItems:"center",justifyContent:"end",paddingTop:"40px",paddingRight:"80px"}}> 
 
            <select name="Order" id="orderselection" 
                 style={{ width: '300px',

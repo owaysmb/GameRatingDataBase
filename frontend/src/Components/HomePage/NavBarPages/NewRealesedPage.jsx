@@ -20,8 +20,9 @@ export function NewReleasedPage(){
     }, []);
  
     return(
-        <>
-        <PagesCard games= {NewReleased}/>
-        </>
+        <div style={{paddingTop:"90px"}}>
+            <h1 style={{color:"#f5f5f5",padding:"40px 80px 0",fontSize:"42px",fontWeight:"700"}}>Recently Released Games</h1>
+            <PagesCard games= {NewReleased}/>
+        </div>
     )
 }

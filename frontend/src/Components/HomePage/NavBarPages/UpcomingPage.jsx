@@ -20,6 +20,9 @@ export function UpcomingPage(){
     }, []);
  
     return(
-        <PagesCard games = {Upcoming}/>
+        <div style={{paddingTop:"90px"}}>
+            <h1 style={{color:"#f5f5f5",padding:"40px 80px 0",fontSize:"42px",fontWeight:"700"}}>Upcoming Games</h1>
+            <PagesCard games = {Upcoming}/>
+        </div>
     )
 }

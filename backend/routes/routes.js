@@ -48,10 +48,10 @@ router.post("/signup", signup);
 router.get("/users/search", SearchUsers);
 router.get("/profile/:username", ProfileByUser)
 router.get("/profile/:username/forums", getForumsByUsername)
-router.get("/getstats", getStats);
+router.get("/getstats", OptionalAuthMiddleware, getStats);
 router.get("/getfavorite", GetFavorite);
 router.get("/getreview", GetReview);
-router.get("/getprogress", GetProgress);
+router.get("/getprogress", OptionalAuthMiddleware, GetProgress);
 router.get("/game/:id/getposts", OptionalAuthMiddleware, GetAllPosts);
 router.get("/game/:id/get-forum", OptionalAuthMiddleware, getForum);
 router.get("/game/:id/getcomment/:postId", OptionalAuthMiddleware, GetComment);

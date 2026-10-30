@@ -24,8 +24,9 @@ export function TopRatedPage(){
 
 
     return(
-        <>
+        <div style={{paddingTop:"90px"}}>
+            <h1 className="page-header" style={{color:"#f5f5f5",padding:"40px 80px 0",fontSize:"42px",fontWeight:"700"}}>Top Rated Games</h1>
             <PagesCard games= {TopRated}/>
-        </>
+        </div>
     )
 }

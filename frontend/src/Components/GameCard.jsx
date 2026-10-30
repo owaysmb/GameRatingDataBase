@@ -1,37 +1,26 @@
-
-// here is the details information of the game and speceifications
-
-
-
 export function GameCard({game,onClick}) {
     return(
         <div 
         onClick={onClick}
         style={{
-        backgroundColor: "#111",
-        borderRadius: "12px",
-        padding: "12px",
-        color: "white",
-        cursor: "pointer",
-      }}>
-            {
-                    <div style={{color:"white",width: "300px" , backgroundColor:"#111",padding:"20px",borderRadius:"40px",transition: "transform 0.3s ease",}} 
-                    onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.1)")}
-                    onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}>
-                        {game.cover && (<img src={`https:${game.cover.url.replace("t_thumb", "t_cover_big")}`}
-                         alt={game.name} style={{width:"100%",height:"220px",objectFit:"cover",borderRadius:"8px"}} />)}
-                    
-                    <h3>{game.name}</h3>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "14px" }}>
-                </div>
-                {game.genres &&(<p style={{ fontSize: "13px", opacity: 0.8 }}>
+          cursor: "pointer",
+          width: "200px",
+          minWidth: "200px"
+        }}>
+            <div 
+            style={{color:"#f5f5f5",width: "200px", transition: "transform 0.2s ease",}} 
+            onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.03)")}
+            onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}>
+                {game.cover && (<img src={`https:${game.cover.url.replace("t_thumb", "t_cover_big")}`}
+                 alt={game.name} style={{width:"200px",height:"280px",objectFit:"cover",borderRadius:"8px",border:"1px solid #2a2a2a"}} />)}
+            
+                <h3 style={{fontSize:"15px",margin:"10px 0 6px 0",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{game.name}</h3>
+                {game.genres &&(<p style={{ fontSize: "13px", color:"#8a8a8a", margin:"0" }}>
                     {game.genres?.length
                     ?game.genres?.map(g => g.name).join(" • "):"Unknown"}
                 </p>)}
                 
-                </div>
-                
-            }
+            </div>
         </div>
     )
 }

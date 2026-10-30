@@ -4,12 +4,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Progress({g,initialProgress}) {
-    const [counter,setCounter] = useState(0)
+    const [counter,setCounter] = useState(initialProgress || 0)
     const FirstRender = useRef(true);
 
 
         useEffect(() => {
-        setCounter(initialProgress);
+        setCounter(initialProgress || 0);
         FirstRender.current = true;
     }, [initialProgress]);
 
@@ -36,16 +36,16 @@ function Progress({g,initialProgress}) {
     }, [counter]);
             
 
-    
-    const addHours = () => setCounter(p => p < g?.timeToBeat?.normally  ? p + 1 : g?.timeToBeat?.normally);
+    const maxHours = typeof g?.timeToBeat === 'object' && g?.timeToBeat !== null ? (g?.timeToBeat?.normally || g?.timeToBeat?.completely || g?.timeToBeat?.hastily || 40) : (typeof g?.timeToBeat === 'number' ? g?.timeToBeat : 40);
+    const addHours = () => setCounter(p => p < maxHours  ? p + 1 : maxHours);
     const subHours = () => setCounter(p => p > 0 ? p - 1 : 0);
    
     return(
         <>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"center"}}>
-            <button onClick={subHours} style={{width:"30px",height:"30px",borderRadius:"50%",color:"white",backgroundColor:"red"}}>-</button>
-            <div >{counter} / {g?.timeToBeat?.normally ? g?.timeToBeat?.normally : "-"}</div>
-            <button onClick={addHours} style={{width:"30px",height:"30px",borderRadius:"50%",color:"white",backgroundColor:"green"}}>+</button>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"6px",color:"#b3b3b3"}}>
+            <button onClick={subHours} style={{width:"24px",height:"24px",borderRadius:"50%",color:"#f5f5f5",backgroundColor:"#1f1f1f",border:"1px solid #2a2a2a"}}>-</button>
+            <div style={{minWidth:"60px",textAlign:"center"}}>{counter} / {maxHours}</div>
+            <button onClick={addHours} style={{width:"24px",height:"24px",borderRadius:"50%",color:"#f5f5f5",backgroundColor:"#8b5cf6",border:"1px solid #2a2a2a"}}>+</button>
         </div>
         </>
     )
@@ -62,12 +62,19 @@ export function StatsCard({game,stats}) {
 
      useEffect(() => {
         const fetchProgress = async () => {
-            const res = await fetch("http://localhost:3000/getprogress", {
-                credentials: "include"
-            });
-            const data = await res.json();
-            setProgressMap(data.UserProgress?.Progress ?? {});
-            console.log(data)
+            try {
+                const res = await fetch("http://localhost:3000/getprogress", {
+                    credentials: "include"
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    setProgressMap(data.UserProgress?.Progress ?? {});
+                } else {
+                    setProgressMap({});
+                }
+            } catch (e) {
+                // ignore
+            }
         };
         fetchProgress();
     }, []);
@@ -77,50 +84,50 @@ export function StatsCard({game,stats}) {
         for (const [k, v] of Object.entries(stats)) {
             if (k !== "allgames" && k !== "_id" && k !== "userId" && k !== "__v" && k !== "createdAt" && k !== "updatedAt") {
                 if (Array.isArray(v) && v.includes(String(gameId))) { 
-                    return <td style={{textAlign:"center"}}>{k}</td>;
+                    return <td style={{textAlign:"center", color:"#b3b3b3"}}>{k}</td>;
                 }
             }
         }
-        return <td>-</td>;
+        return <td style={{textAlign:"center", color:"#8a8a8a"}}>-</td>;
     }
 
     return(
         <>
-        <table style={{ width:"100%", borderCollapse:"collapse", fontSize:"20px" }}>
+            <div style={{overflowX:"auto"}}>
+                <table style={{ width:"100%", borderCollapse:"collapse", fontSize:"16px" }}>
 
 
-            <thead style={{ width:"100%", borderCollapse:"collapse", fontSize:"13px"}}>
-                <tr style={{ fontSize:"30px"}}>
-                    <th style={{ width:"30px" }}>#</th>
-                    <th style={{ width:"60px" }}>Image</th>
-                    <th style={{ textAlign:"left" }}>Game Title</th>
-                    <th style={{ width:"80px", textAlign:"center" }}>Score</th>
-                    <th style={{ width:"150px", textAlign:"center" }}>Status</th>
-                    <th style={{ width:"150px", textAlign:"center" }}>Progress</th>
-                </tr>
-            </thead>
-            
-            <tbody>
-            {game.map((g, i) => (
-                    <tr key={g.id} style={{ borderBottom:"1px solid #eee" }}>
-                        <td>{i + 1}</td>
-                        <td style={{padding:"10px"}}>
-                            {g.cover
-                                ? <img src={g.cover} style={{ width:100, height:120, objectFit:"cover" }} />
-                                : <div style={{ width:40, height:55, background:"#eee" }} />
-                            }
-                        </td>
-                            <td style={{ fontWeight:500 ,cursor: "pointer" ,padding:"10px"}} onClick={()=>{navigate(`/game/${g.id}`)}} >{g.name}</td>
-                            <td style={{ textAlign:"center" }}> {g.rating ? Math.round(g.rating) : "-"}</td>
-                            {findStats(g.id)}
-                            <td><Progress g={g} initialProgress={progressMap[String(g.id)] ?? 0} /></td>
-                    </tr>
-                ))}
-            </tbody>
-            
-        </table>
-            
-            
+                    <thead style={{ width:"100%", borderCollapse:"collapse", fontSize:"14px"}}>
+                        <tr style={{ color:"#8a8a8a"}}>
+                            <th style={{ width:"30px", textAlign:"left" }}>#</th>
+                            <th style={{ width:"60px", textAlign:"left" }}>Image</th>
+                            <th style={{ textAlign:"left" }}>Game Title</th>
+                            <th style={{ width:"80px", textAlign:"center" }}>Score</th>
+                            <th style={{ width:"150px", textAlign:"center" }}>Status</th>
+                            <th style={{ width:"150px", textAlign:"center" }}>Progress</th>
+                        </tr>
+                    </thead>
+                    
+                    <tbody>
+                    {(game || []).map((g, i) => (
+                        <tr key={g.id} style={{ borderBottom:"1px solid #1f1f1f" }}>
+                                <td style={{color:"#f5f5f5"}}>{i + 1}</td>
+                                <td style={{padding:"10px"}}>
+                                    {g.cover
+                                        ? <img src={g.cover} style={{ width:60, height:80, objectFit:"cover", borderRadius:"4px" }} />
+                                        : <div style={{ width:60, height:80, background:"#1f1f1f" }} />
+                                    }
+                                </td>
+                                <td style={{ fontWeight:500 ,cursor: "pointer" ,padding:"10px", color:"#f5f5f5"}} onClick={()=>{navigate(`/game/${g.id}`)}} >{g.name}</td>
+                                <td style={{ textAlign:"center", color:"#b3b3b3" }}> {g.rating ? Math.round(g.rating) : "-"}</td>
+                                {findStats(g.id)}
+                                <td><Progress g={g} initialProgress={progressMap[String(g.id)] ?? 0} /></td>
+                        </tr>
+                    ))}
+                    </tbody>
+                    
+                </table>
+            </div>
         </>
     )
 }

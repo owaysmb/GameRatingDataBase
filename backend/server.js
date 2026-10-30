@@ -95,8 +95,8 @@ app.get("/",(req,res)=>{
 app.get("/api/top-rated",async (req ,res)=>{
     try{
         const TopRatedRes = new IGDBService()
-        const data = await cache("igdb:top-rated",()=> TopRatedRes.FetchRes(`
-                        fields name, cover.url, genres.name, rating, rating_count;
+        const data = await cache("igdb:top-rated-home",()=> TopRatedRes.FetchRes(`
+                        fields name, cover.url, genres.name, rating, rating_count , first_release_date;
                         where rating != null & rating_count >= 1200;
                         sort rating desc;
                         limit 10;

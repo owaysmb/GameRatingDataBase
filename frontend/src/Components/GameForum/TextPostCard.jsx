@@ -60,8 +60,8 @@ export function TextPostCard({post,deletePost}) {
     };
 
     const iconsStyle = {
-        fontSize:"30px",
-        color:"white",
+        fontSize:"24px",
+        color:"#b3b3b3",
         cursor:"pointer"
     }
 
@@ -80,27 +80,28 @@ export function TextPostCard({post,deletePost}) {
                 gap:"20px",
                 marginTop:"20px",
                 alignItems:"center",
-                backgroundColor:"rgba(63, 19, 57, 0.7)",
+                backgroundColor:"#151515",
+                border:"1px solid #2a2a2a",
                 padding:"20px",
                 borderRadius:"10px",
-                width:"40%",
+                width:"60%",
                 margin:"0 auto",
             }}>
 
                 <div style={{display:"flex", justifyContent:"space-between", width:"100%"}}>
-                    <div style={{display:"flex",alignItems:"center",gap:"20px"}}>
-                        <img src={reactLogo} style={{cursor:"pointer",width:"20px"}} />
-                        <p style={{fontSize:"30px"}}>{post.userId?.username}</p>
+                    <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
+                        <img src={reactLogo} style={{cursor:"pointer",width:"32px",height:"32px",borderRadius:"50%"}} />
+                        <p style={{fontSize:"16px",color:"#f5f5f5",margin:0}}>{post.userId?.username}</p>
                     </div>
                     {post.userId?._id === user?._id && (
-                       <MdDelete onClick={() => deletePost(post._id)} style={{fontSize:"30px"}} />
+                       <MdDelete onClick={() => deletePost(post._id)} style={{fontSize:"24px",color:"#ec4899",cursor:"pointer"}} />
                     )}
                 </div>
 
                 <div key={post._id} style={{display:"flex",flexDirection:"column",gap:"10px",alignItems:"start",width:"100%"}}>
-                    <h3>{post.title}</h3>
-                    <p style={{color:"grey"}}>{post.text}</p>
-                    <div style={{display:"flex",gap:"20px",alignItems:"center"}}>
+                    <h3 style={{margin:0,color:"#f5f5f5"}}>{post.title}</h3>
+                    <p style={{color:"#b3b3b3",margin:0}}>{post.text}</p>
+                    <div style={{display:"flex",gap:"12px",alignItems:"center",color:"#b3b3b3"}}>
                         <ThumbUpIcon style={iconsStyle} onClick={() => handleLike(true)} />
                         {likeCount}
                         <ThumbDownIcon style={iconsStyle} onClick={() => handleLike(false)} />

@@ -1,13 +1,7 @@
-import { RestaurantRounded } from "@mui/icons-material";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-
-// mui icons and components
-import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import { MdOutlineFavorite } from "react-icons/md";
-
-// react icons
 import Rating from '@mui/material/Rating';
 import { FaStar } from "react-icons/fa6";
 
@@ -28,12 +22,9 @@ export function GameCoverAndTrailer({game}) {
                 credentials: "include",
                 body: JSON.stringify({ rating: starValue })
             });
-            console.log("done rating by fetch")
-
         } catch (err) {
             console.error(err);
         }
-        
     }
     useEffect(() => {
         if (starValue > 0) {
@@ -63,115 +54,101 @@ export function GameCoverAndTrailer({game}) {
             const FavData = await resFav.json();
             const favList = FavData.Favorites ?? [];
             SetFav(favList);
-
             setFavorite(favList.includes(String(id)));
         };
         fetchFav();
     }, [id]); 
 
-useEffect(() => {
-    const fetchRating = async () => {
-        const res = await fetch(`http://localhost:3000/game/${id}/getrating`, {
-            credentials: "include"
-        });
-        const data = await res.json();
-        SetstarValue(data.rating);
-    };
-    fetchRating();
-}, [id]);
+    useEffect(() => {
+        const fetchRating = async () => {
+            const res = await fetch(`http://localhost:3000/game/${id}/getrating`, {
+                credentials: "include"
+            });
+            const data = await res.json();
+            SetstarValue(data.rating);
+        };
+        fetchRating();
+    }, [id]);
     
     return(
         <>  
-        {/* main container */}
-            <div style={{display:"flex" , gap:"20px" , alignItems:"center",justifyContent:"space-evenly",padding:"30px",height:"500px",backgroundColor:"#111",borderRadius:"10px",marginTop:"40px"}}> 
-                {/* game name and cover  */}
-                <div style={{padding:"20px", textAlign:"center"}}>
-                    <h1 style={{color:"white"}}>{game.name}</h1>
+            <div style={{display:"flex" , gap:"40px" , alignItems:"flex-start",justifyContent:"flex-start",flexWrap:"wrap",padding:"40px 80px",backgroundColor:"#0a0a0a",borderRadius:"10px",marginTop:"110px"}}> 
+                <div style={{display:"flex",flexDirection:"column",gap:"16px"}}>
+                    <h1 style={{color:"#f5f5f5",fontSize:"42px",fontWeight:"700",margin:0}}>{game.name}</h1>
                     {game.cover && (
                     <img
-                    
                     src={game.cover}
                     alt={game.name}
-                    style={{borderRadius:"40px", width:"350px",}}
+                    style={{borderRadius:"8px", width:"280px",border:"1px solid #2a2a2a"}}
                     />
                 )}
                 </div> 
 
-                {/* Game rating and release date */}
-                <div style={{width:"300px",height:"100%", display:"flex", flexDirection:"column",textAlign:"start", justifyContent:"space-evenly"}}>
+                <div style={{display:"flex", flexDirection:"column",gap:"24px",paddingTop:"60px"}}>
                     {game.release_date && (
-                        <h3 style={{color:"white",width:"300px",fontSize:"20px"}}>
-                            Release Date:{game.release_date}
-                        </h3>
+                        <div style={{color:"#b3b3b3"}}>
+                            <div style={{color:"#8a8a8a",fontSize:"14px"}}>Release Date</div>
+                            <div style={{color:"#f5f5f5",fontSize:"18px"}}>{game.release_date}</div>
+                        </div>
                     )}
 
                     <div>
-                {(
-                    <h3 style={{color:"white",width:"300px",display:"flex", alignItems:"center", gap:"10px"}} >
-                        {
-                            
-                            Math.round(game.rating) >= 80 
-                            ? <FaStar style={{fontSize:"80px" , color:"#00ff15"}} /> 
-                            : game.rating >= 60 ? <FaStar style={{fontSize:"80px" , color:"#fbff00"}} /> 
-                            : <FaStar style={{fontSize:"80px" , color:"#ff0000"}} /> 
-                            
-                            
-                        }
-                        <div style={{fontSize:"60px"}}>
-                            {game.rating ? Math.round(game.rating) : "N/A"}
+                        <div style={{display:"flex", alignItems:"center", gap:"12px"}} >
+                            {
+                                Math.round(game.rating) >= 80 
+                                ? <FaStar style={{fontSize:"48px" , color:"#38bdf8"}} /> 
+                                : game.rating >= 60 ? <FaStar style={{fontSize:"48px" , color:"#8b5cf6"}} /> 
+                                : <FaStar style={{fontSize:"48px" , color:"#ec4899"}} /> 
+                            }
+                            <div style={{fontSize:"40px",color:"#f5f5f5"}}>
+                                {game.rating ? Math.round(game.rating) : "N/A"}
+                            </div>
                         </div>
-                    </h3>
-                )}
-            </div>
-            <div style={{display:"flex",gap:"30px",alignItems:"center"}}>
+                    </div>
+                    <div style={{display:"flex",gap:"16px",alignItems:"center"}}>
 
-                <MdOutlineFavorite 
-                    size={32} 
-                    onClick={handleFavorite}
-                    style={{ cursor:"pointer", color: favorite ? "red" : "white" }} 
-                />
-                
-                    <Box style={{backgroundColor:"rgb(255, 255, 255)", padding:"20px", borderRadius:"20px", textAlign:"center"}}>
-                        <Rating 
-                            name="customized-10"  
-                            max={5} 
-                            style={{fontSize:"40px"}}
-                            value={starValue}
-                            onChange={(event, newValue) => {
-                                SetstarValue(newValue);
-                            }}
-                            sx={{
-                                '& .MuiRating-iconFilled': {
-                                    color: starValue >= 4 ? '#00ff15' 
-                                        : starValue >= 3 ? '#fbff00' 
-                                        : '#ff0000'
-                                }
-                            }}
+                        <MdOutlineFavorite 
+                            size={28} 
+                            onClick={handleFavorite}
+                            style={{ cursor:"pointer", color: favorite ? "#ec4899" : "#b3b3b3" }} 
                         />
-                    </Box>
-            </div>
-                    
+                        
+                        <Box style={{backgroundColor:"#151515", padding:"10px 16px", borderRadius:"8px", textAlign:"center",border:"1px solid #2a2a2a"}}>
+                            <Rating 
+                                name="customized-10"  
+                                max={5} 
+                                style={{fontSize:"28px"}}
+                                value={starValue}
+                                onChange={(event, newValue) => {
+                                    SetstarValue(newValue);
+                                }}
+                                sx={{
+                                    '& .MuiRating-iconFilled': {
+                                        color: "#8b5cf6"
+                                    },
+                                    '& .MuiRating-iconEmpty': {
+                                        color: "#353535"
+                                    }
+                                }}
+                            />
+                        </Box>
+                    </div>
                 </div>
 
-                {/* game trailer  */}
-
-                <div>
+                <div style={{flex:"1 1 600px",minWidth:"280px"}}>
                     {game.trailer && (
                         <iframe
-                            width="700"
+                            width="100%"
                             height="380"
                             src={game.trailer}
                             title="Game Trailer"
                             frameBorder="0"
                             allowFullScreen
-                            style={{borderRadius:"40px"}}
+                            style={{borderRadius:"8px",border:"1px solid #2a2a2a"}}
                         />
                     )}
                 </div>     
             </div>
-
-            
-
         </>
     )
 }

@@ -74,7 +74,7 @@ export function Comments() {
 
     return (
         <>
-            <div style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "16px", alignItems: "center" }}>
+            <div style={{ padding: "40px 24px", display: "flex", flexDirection: "column", gap: "16px", alignItems: "center" }}>
                 {renderPostCard()}
 
                 {user ? (
@@ -84,9 +84,9 @@ export function Comments() {
                             placeholder="Join the conversation"
                             value={Comment}
                             onChange={(e) => setComment(e.target.value)}
-                            style={{ height: "50px", width: "700px", borderRadius: "40px" }}
+                            style={{ height: "48px", width: "700px", borderRadius: "8px", background:"#151515",border:"1px solid #2a2a2a",color:"#f5f5f5",padding:"0 16px" }}
                         />
-                        <button onClick={(e) => {e.preventDefault(); handlesave();}} >Comment</button>
+                        <button onClick={(e) => {e.preventDefault(); handlesave();}} style={{padding:"10px 18px",background:"#1f1f1f",color:"#f5f5f5",border:"1px solid #2a2a2a",borderRadius:"8px"}} >Comment</button>
                     </>
                 ) : (
                     <p style={{ color: "grey", fontSize: "14px" }}>

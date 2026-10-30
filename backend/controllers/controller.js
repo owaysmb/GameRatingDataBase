@@ -334,7 +334,10 @@ export const getStats = async (req, res) => {
     try {
         const userId = req.query.userId || req.user?.id;
         if (!userId) {
-            return res.status(401).json({ message: "User not authenticated" });
+            return res.status(200).json({
+                played: [], playing: [], OnHold: [],
+                WantToPlay: [], DontWantToPlay: [], allgames: []
+            });
         }
 
         const objectId = new mongoose.Types.ObjectId(userId);
@@ -466,7 +469,7 @@ export const GetProgress =  async (req,res)=>{
         
         const userId = req.query.userId || req.user?.id;
         if (!userId) {
-            return res.status(401).json({ message: "User not authenticated" });
+            return res.status(200).json({UserProgress: null}); 
         }
         let UserProgress = await  cache(`progress:${userId}`, () => ProgressSchema.findOne({userId}));
         

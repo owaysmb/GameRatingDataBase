@@ -30,28 +30,34 @@ export function NavbarButton(){
             setVisibleItems(false);
         }
     }
-const styles = {
-    off: {
-        height: "40px",
-        width: "80%",
-        transition: "all 0.8s ease",
-        borderRadius: "20px",
-        padding: "10px",
-        position: "absolute",
-        alignItems: "center",
-        zIndex: 1000,
-    },
-    on: {
-        transition: "all 0.8s ease",
-        height: "350px",
-        alignItems: "start",
-        padding: "10px",
-        borderRadius: "20px",
-        width: "80%",
-        position: "absolute",
-        zIndex: 1000,
-    },
-};
+    const styles = {
+        off: {
+            height: "64px",
+            width: "92%",
+            maxWidth: "1200px",
+            transition: "all 0.3s ease",
+            borderRadius: "10px",
+            padding: "0 16px",
+            position: "absolute",
+            alignItems: "center",
+            zIndex: 1000,
+            backgroundColor: "#151515",
+            border: "1px solid #2a2a2a",
+        },
+        on: {
+            transition: "all 0.3s ease",
+            height: "340px",
+            alignItems: "start",
+            padding: "0 16px",
+            borderRadius: "10px",
+            width: "92%",
+            maxWidth: "1200px",
+            position: "absolute",
+            zIndex: 1000,
+            backgroundColor: "#151515",
+            border: "1px solid #2a2a2a",
+        },
+    };
     function styleclicked(){
         return clicked? styles.on : styles.off
     }
@@ -74,9 +80,11 @@ const styles = {
 //         }
 //     }, [visibleItems, clicked])
 
-const ListStyle = {
+    const ListStyle = {
         cursor:"pointer",
         listStyle: "none",
+        color: "#b3b3b3",
+        fontSize: "15px",
     }
 function ShowItems(){
     if(clicked){
@@ -130,35 +138,35 @@ function closeNavbar() {
     //   )})}  
     // </div>
     
-    <div style={{color:"white",fontSize:"20px",display:"flex",justifyContent:"space-evenly",width:"100%"}}>
-        {/* Discver */}
-        <ul style={{display:"grid",gap:"10px"}}> 
-            <h2>Discover</h2>
-            <li onClick={()=> {navigate("/top-rated-page"); closeNavbar()}}  style={ListStyle}>Top Games</li>
-            <li onClick={()=> {navigate("/new-released-page"); closeNavbar()}} style={ListStyle}>New Released</li>
-            <li onClick={()=> {navigate("/trending-page"); closeNavbar()}}     style={ListStyle}>Trending Games</li>
-            <li onClick={()=> {navigate("/Upcoming-page"); closeNavbar()}}     style={ListStyle}>Upcoming Games</li>
+    <div style={{color:"#f5f5f5",fontSize:"16px",display:"flex",justifyContent:"space-between",width:"100%",padding:"20px 0",flexWrap:"wrap",gap:"20px",overflowX:"auto"}}>
+        {/* Discover */}
+        <ul style={{display:"grid",gap:"8px",margin:0,padding:0}}>
+            <h2 style={{margin:"0 0 8px 0",fontSize:"16px",color:"#f5f5f5"}}>Discover</h2>
+            <li onClick={()=> {navigate("/top-rated-page"); closeNavbar()}}  style={{...ListStyle}} onMouseEnter={(e)=>e.currentTarget.style.color="#ec4899"} onMouseLeave={(e)=>e.currentTarget.style.color="#b3b3b3"}>Top Games</li>
+            <li onClick={()=> {navigate("/new-released-page"); closeNavbar()}} style={{...ListStyle}} onMouseEnter={(e)=>e.currentTarget.style.color="#ec4899"} onMouseLeave={(e)=>e.currentTarget.style.color="#b3b3b3"}>New Released</li>
+            <li onClick={()=> {navigate("/trending-page"); closeNavbar()}}     style={{...ListStyle}} onMouseEnter={(e)=>e.currentTarget.style.color="#ec4899"} onMouseLeave={(e)=>e.currentTarget.style.color="#b3b3b3"}>Trending Games</li>
+            <li onClick={()=> {navigate("/Upcoming-page"); closeNavbar()}}     style={{...ListStyle}} onMouseEnter={(e)=>e.currentTarget.style.color="#ec4899"} onMouseLeave={(e)=>e.currentTarget.style.color="#b3b3b3"}>Upcoming Games</li>
         </ul>
         {/* Database */}
-        <ul style={{display:"grid",gap:"10px"}}> 
-            <h2 >Database</h2>
-            <li style={ListStyle}>Advanced Search</li>
-            <li style={ListStyle}>Platforms</li>
-            <li style={ListStyle}>Events</li>
+        <ul style={{display:"grid",gap:"8px",margin:0,padding:0}}>
+            <h2 style={{margin:"0 0 8px 0",fontSize:"16px",color:"#f5f5f5"}}>Database</h2>
+            <li style={ListStyle} onMouseEnter={(e)=>e.currentTarget.style.color="#ec4899"} onMouseLeave={(e)=>e.currentTarget.style.color="#b3b3b3"}>Advanced Search</li>
+            <li style={ListStyle} onMouseEnter={(e)=>e.currentTarget.style.color="#ec4899"} onMouseLeave={(e)=>e.currentTarget.style.color="#b3b3b3"}>Platforms</li>
+            <li style={ListStyle} onMouseEnter={(e)=>e.currentTarget.style.color="#ec4899"} onMouseLeave={(e)=>e.currentTarget.style.color="#b3b3b3"}>Events</li>
         </ul >
         {/* Community */}
-        <ul style={{display:"grid",gap:"10px"}}> 
-            <h2>Community</h2>
-            <li style={ListStyle} >Forums</li>
-            <li onClick={()=> {navigate("/users"); closeNavbar()}} style={ListStyle} >Users</li>
+        <ul style={{display:"grid",gap:"8px",margin:0,padding:0}}>
+            <h2 style={{margin:"0 0 8px 0",fontSize:"16px",color:"#f5f5f5"}}>Community</h2>
+            <li style={ListStyle} onMouseEnter={(e)=>e.currentTarget.style.color="#ec4899"} onMouseLeave={(e)=>e.currentTarget.style.color="#b3b3b3"} >Forums</li>
+            <li onClick={()=> {navigate("/users"); closeNavbar()}} style={ListStyle} onMouseEnter={(e)=>e.currentTarget.style.color="#ec4899"} onMouseLeave={(e)=>e.currentTarget.style.color="#b3b3b3"} >Users</li>
         </ul>
         {/* Help */}
-        <ul style={{display:"grid",gap:"10px"}}> 
-            <h2>Help</h2>
-            <li style={ListStyle}>Contact</li>
-            <li style={ListStyle}>About GRDB</li>
-            <li style={ListStyle}>API Documentaions</li>
-            <li style={ListStyle}>Social Media</li>
+        <ul style={{display:"grid",gap:"8px",margin:0,padding:0}}>
+            <h2 style={{margin:"0 0 8px 0",fontSize:"16px",color:"#f5f5f5"}}>Help</h2>
+            <li style={ListStyle} onMouseEnter={(e)=>e.currentTarget.style.color="#ec4899"} onMouseLeave={(e)=>e.currentTarget.style.color="#b3b3b3"}>Contact</li>
+            <li style={ListStyle} onMouseEnter={(e)=>e.currentTarget.style.color="#ec4899"} onMouseLeave={(e)=>e.currentTarget.style.color="#b3b3b3"}>About GRDB</li>
+            <li style={ListStyle} onMouseEnter={(e)=>e.currentTarget.style.color="#ec4899"} onMouseLeave={(e)=>e.currentTarget.style.color="#b3b3b3"}>API Documentation</li>
+            <li style={ListStyle} onMouseEnter={(e)=>e.currentTarget.style.color="#ec4899"} onMouseLeave={(e)=>e.currentTarget.style.color="#b3b3b3"}>Social Media</li>
         </ul>
     </div>
 
@@ -200,16 +208,16 @@ function closeNavbar() {
         if(!user){
             return(
                 <>
-                <PersonOutlinedIcon fontSize="large" sx={{backgroundColor:"transparent",color:"white",cursor:"pointer"}} onClick={()=>{handleLogin();closeNavbar()}}/>
+                <PersonOutlinedIcon fontSize="large" sx={{backgroundColor:"transparent",color:"#f5f5f5",cursor:"pointer"}} onClick={()=>{handleLogin();closeNavbar()}}/>
                 </>
             )
         }else{
             return(
                 <>
                 {/* {navigate("/profile")} */}
-                <div style={{display:"flex",alignContent:"center"}}>
-                    <PersonOutlinedIcon fontSize="large" sx={{backgroundColor:"transparent",color:"green",cursor:"pointer"}}  onClick={()=> {handleLogin();closeNavbar()}}/>
-                    <button style={{backgroundColor:"lightblue",borderRadius:"10px",cursor:"pointer"}} onClick={handleLogout} >Logout</button>
+                <div style={{display:"flex",alignItems:"center",gap:"10px"}}>
+                    <PersonOutlinedIcon fontSize="large" sx={{backgroundColor:"transparent",color:"#f5f5f5",cursor:"pointer"}}  onClick={()=> {handleLogin();closeNavbar()}}/>
+                    <button style={{backgroundColor:"#1f1f1f",color:"#f5f5f5",border:"1px solid #2a2a2a",borderRadius:"6px",cursor:"pointer",padding:"6px 10px"}} onClick={handleLogout} >Logout</button>
                 </div>
                 </>
             )
@@ -219,23 +227,22 @@ function closeNavbar() {
    
     return(
         <>
-        <div style={{display:"flex",justifyContent:"center",padding:"2rem"}}>
+        <div style={{display:"flex",justifyContent:"center",padding:"1rem 1.5rem"}}>
             
-            <div style={{...styleclicked(),display: "flex", flexDirection: "column",   padding: "10px",backgroundColor:"black"}} onTransitionEnd={ShowItems} >
-            <div style={{display: "flex",justifyContent: "space-between",width: "100%",}}> 
-                 <DehazeRoundedIcon onClick={onClick} sx={{color:"white",backgroundColor:"transparent",fontSize:"30px",cursor:"pointer"}}/>
+            <div style={{...styleclicked(),display: "flex", flexDirection: "column",   padding: "0 16px",backgroundColor:"#151515"}} onTransitionEnd={ShowItems} >
+            <div style={{display: "flex",justifyContent: "space-between",width: "100%", alignItems:"center", height:"64px", gap:"12px", flexWrap:"nowrap"}}> 
+                 <DehazeRoundedIcon onClick={onClick} sx={{color:"#f5f5f5",backgroundColor:"transparent",fontSize:"28px",cursor:"pointer"}}/>
                  <img src={reactLogo} alt="logo" style={{cursor:"pointer"}} onClick={()=>{navigate("/");closeNavbar()}} /> 
                  <form onSubmit={handleSearch}>
                    <input 
                    type="text" 
-                   placeholder="  Search.." 
-                   style={{width:"400px",borderRadius:"40px",color:"black",height:"30px",border:"none",outline:"none",backgroundColor:"#53d8fb",font:"bold"}}
-                   onChange={(e)=>{setSearch(e.target.value);closeNavbar()}}
+                   placeholder="Search games..." 
+                   style={{width:"clamp(200px, 40vw, 320px)",borderRadius:"8px",color:"#f5f5f5",height:"36px",border:"1px solid #2a2a2a",outline:"none",backgroundColor:"#1f1f1f",padding:"0 12px"}}
+                   onChange={(e)=>{setSearch(e.target.value);}}
                    value={search}
                    /> 
                  </form>
-                  
-                {/* <PersonOutlinedIcon fontSize="large" sx={{backgroundColor:"transparent",color:"white",cursor:"pointer"}} onClick={CheckLogin}/> */}
+                   
                 <ProfilePictureNavbar/>
             </div>
              {visibleItems  && <ShowCategoriesAfterClick/>} 

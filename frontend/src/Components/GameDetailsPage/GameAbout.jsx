@@ -1,105 +1,99 @@
 
+import { useNavigate } from "react-router-dom";
 
 export function GameAbout({game}) {
+    const navigate = useNavigate();
     const parastyle = {
-        "fontSize":"15px",
-        "padding":"5px"
+        "fontSize":"14px",
+        "color":"#b3b3b3",
+        "margin":"4px 0"
     }
     const columnStyle = {
         width: "200px",
-        display: "grid",
-        alignItems: "flex-start",
+        display: "flex",
+        flexDirection: "column",
+        gap: "6px"
     };
 
     return(
         <>
-        {/* container of platforms and about details */}
-            <div style={{display:"flex",gap:"80px",padding:"80px"}}>
-                {/* platforms */}
-                <div style={{color:"white"}}>
-                    <h1 style={{color:"white",margin:"10px"}}>Platforms:</h1>
+            <div style={{display:"flex",flexWrap:"wrap",gap:"40px",padding:"20px 80px 40px"}}>
+                <div style={{color:"#f5f5f5"}}>
+                    <h1 style={{color:"#f5f5f5",margin:"10px 0 16px 0",fontSize:"28px"}}>Platforms</h1>
                     {game.platforms && game.platforms.map(p => (
-                        <span key={p.id} 
+                        <div key={p.id} 
                         style={{
-                            display:"flex",
-                            flexDirection:"column",
-                            backgroundColor:"#111",
-                            padding:"5px",
-                            margin:"5px",
+                            backgroundColor:"#151515",
+                            border:"1px solid #2a2a2a",
+                            padding:"8px 12px",
+                            margin:"6px 0",
                             width:"200px",
-                            borderRadius:"10px",
-                            textAlign:"center",
-                        }}>{p.name}</span>
+                            borderRadius:"8px",
+                            textAlign:"left",
+                            color:"#b3b3b3"
+                        }}>{p.name}</div>
                     ))}
                 </div>
 
-                {/* about the game */}
-                <div style={{backgroundColor:"#111", padding:"10px", margin:"10px", borderRadius:"20px",width:"70%",height:"550px"}}>
-                    {/* the first part */}
-                    <div style={{height:"40%",display:"flex",alignItems:"Start",justifyContent:"space-around",color:"white"}}>
-                        <div style={{columnStyle}}>
-                            <h2>Main Publishers</h2>
+                <div style={{backgroundColor:"#151515", border:"1px solid #2a2a2a", padding:"24px", borderRadius:"10px",flex:"1 1 700px"}}>
+                    <div style={{display:"flex",flexWrap:"wrap",gap:"40px",alignItems:"flex-start",color:"#f5f5f5"}}>
+                        <div style={columnStyle}>
+                            <h2 style={{margin:"0 0 10px 0",fontSize:"18px"}}>Main Publishers</h2>
                             {game.involved_companies
                                 ?.filter(c => c.publisher)
                                 .map((c, i) => (
                                 <div key={i} style={parastyle}>{c.company?.name}</div>
                                 ))}
+                            {(!game.involved_companies?.some(c=>c.publisher)) && <div style={parastyle}>N/A</div>}
                         </div>
 
                         <div style={columnStyle}>
-                            <h2>Main Developers</h2>
+                            <h2 style={{margin:"0 0 10px 0",fontSize:"18px"}}>Main Developers</h2>
                             {game.involved_companies
                                 ?.filter(c => c.developer)
                                 .map((c, i) => (
                                 <div key={i} style={parastyle}>{c.company?.name}</div>
                                 ))}
+                            {(!game.involved_companies?.some(c=>c.developer)) && <div style={parastyle}>N/A</div>}
                         </div>
                         
                         <div style={columnStyle}>
-                            <h2>Genres</h2>
+                            <h2 style={{margin:"0 0 10px 0",fontSize:"18px"}}>Genres</h2>
                             {game.genres?.map(g => (
                                 <div key={g.id} style={parastyle}>{g.name}</div>
                             ))}
                         </div>
                         <div style={columnStyle}>
-                            <h2>Game Modes</h2>
+                            <h2 style={{margin:"0 0 10px 0",fontSize:"18px"}}>Game Modes</h2>
                             {game.game_modes?.map(gm => (
                                 <div key={gm.id} style={parastyle}>{gm.name}</div>
                             ))}
                         </div>
                     </div>
-                    <hr/>
-                    {/* the second part */}
-                    <div style={{height:"50%",display:"flex",alignItems:"Start",justifyContent:"space-around",color:"white"}}>
+                    <hr style={{border:"none",borderTop:"1px solid #2a2a2a",margin:"24px 0"}}/>
+                    <div style={{display:"flex",flexWrap:"wrap",gap:"40px",alignItems:"flex-start",color:"#f5f5f5"}}>
                         <div style={columnStyle}>
-                            <h2>Series</h2>
+                            <h2 style={{margin:"0 0 10px 0",fontSize:"18px"}}>Series</h2>
                             <div style={parastyle}>{game.collection ? game.collection.name : game.name}</div>
                         </div>
                         <div style={columnStyle}>
-                            <h2>Themes</h2>
+                            <h2 style={{margin:"0 0 10px 0",fontSize:"18px"}}>Themes</h2>
                             {game.themes?.map(t => (
                                 <div key={t.id} style={parastyle}>{t.name}</div>
                             ))}
                         </div >
                         <div style={columnStyle}>
-                            <h2>Game Engine</h2>
+                            <h2 style={{margin:"0 0 10px 0",fontSize:"18px"}}>Game Engine</h2>
                             {game.game_engines?.map(ge =>(
-                                <div key={ge.id} style={columnStyle}> {ge.name} </div>
+                                <div key={ge.id} style={parastyle}> {ge.name} </div>
                             ))}
                         </div>
                         <div style={columnStyle}>
-                            <h2>Time To Beat</h2>
+                            <h2 style={{margin:"0 0 10px 0",fontSize:"18px"}}>Time To Beat</h2>
                             <div style={parastyle}>N/A</div>
                         </div>
-                        
                     </div>
-
-
                 </div>
-
-
-
-
             </div>
         </>
     )

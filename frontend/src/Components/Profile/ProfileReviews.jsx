@@ -73,22 +73,21 @@ export function ProfileReviews({ profileUser, isOwnProfile }) {
     };
     return (
         <>
-            <h1>{profileUser?.username}'s Reviews : </h1>
+            <h1 style={{color:"#f5f5f5",fontSize:"28px"}}>{profileUser?.username}'s Reviews</h1>
 
-            <div style={{display:"flex",gap:"20px",padding:"30px",backgroundColor:"#111",borderRadius:"20px",justifyContent:"space-around",textAlign:"center",flexWrap:"wrap"}}>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill, minmax(260px, 1fr))",gap:"16px",padding:"20px",backgroundColor:"#151515",borderRadius:"10px",border:"1px solid #2a2a2a"}}>
                 {game?.map(g => (
-                    <div key={g.reviewId} style={{flexDirection:"column",alignItems:"center",width:"250px",cursor:"pointer",backgroundColor:"#333",padding:"10px",borderRadius:"10px"}}>
-                        <div style={{display:"flex",alignItems:"start",justifyContent:"space-between"}}>
+                    <div key={g.reviewId} style={{display:"flex",flexDirection:"column",backgroundColor:"#1f1f1f",border:"1px solid #2a2a2a",borderRadius:"10px",overflow:"hidden"}}>
+                        <div style={{position:"relative"}}>
                             {g.cover
-                                ? <img src={g.cover} alt={g.name} style={{width:"150px",height:"200px",objectFit:"cover",borderRadius:"8px"}} onClick={() => navigate(`/game/${g.id}`)} />
-                                : <div style={{width:"150px",height:"200px",backgroundColor:"#333",borderRadius:"8px",display:"flex",alignItems:"center",justifyContent:"center",color:"#666"}}>No Image</div>
+                                ? <img src={g.cover} alt={g.name} style={{width:"100%",height:"200px",objectFit:"cover",cursor:"pointer"}} onClick={() => navigate(`/game/${g.id}`)} />
+                                : <div style={{width:"100%",height:"200px",backgroundColor:"#1f1f1f",display:"flex",alignItems:"center",justifyContent:"center",color:"#8a8a8a"}}>No Image</div>
                             }
-                           <MdDelete onClick={() => handleDeleteClick(g.reviewId)} style={{fontSize:"30px",cursor:"pointer"}} />
+                            {isOwnProfile && <MdDelete onClick={() => handleDeleteClick(g.reviewId)} style={{fontSize:"22px",cursor:"pointer",color:"#ec4899",position:"absolute",top:"8px",right:"8px",background:"rgba(10,10,10,0.7)",borderRadius:"50%",padding:"4px"}} />}
                         </div>
-
-                        <div style={{display:"flex",flexDirection:"column",alignItems:"center",width:"250px",cursor:"pointer"}}>
-                            <h2 style={{fontSize:"20px",textAlign:"center",color:"white"}}>{g.name}</h2>
-                            <p style={{color:"lightblue",fontSize:"20px"}}>{g.review}</p>
+                        <div style={{padding:"12px",display:"flex",flexDirection:"column",gap:"8px"}}>
+                            <h2 style={{fontSize:"16px",color:"#f5f5f5",margin:0,cursor:"pointer"}} onClick={() => navigate(`/game/${g.id}`)}>{g.name}</h2>
+                            <p style={{color:"#b3b3b3",fontSize:"14px",margin:0,whiteSpace:"pre-wrap"}}>{g.review}</p>
                         </div>
                     </div>
                 ))}

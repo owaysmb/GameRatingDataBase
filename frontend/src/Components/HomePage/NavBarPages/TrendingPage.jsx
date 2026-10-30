@@ -20,6 +20,9 @@ export function TrendingPage(){
     }, []);
  
     return(
-       <PagesCard games={Trending}/>
+        <div style={{paddingTop:"90px"}}>
+            <h1 style={{color:"#f5f5f5",padding:"40px 80px 0",fontSize:"42px",fontWeight:"700"}}>Trending Games</h1>
+            <PagesCard games={Trending}/>
+        </div>
     )
 }

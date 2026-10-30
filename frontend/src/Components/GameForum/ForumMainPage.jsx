@@ -131,25 +131,23 @@ export function ForumMainPage() {
 
 
   const ForumButtonStyle = {
-    backgroundColor: "green",
-    color: "white",
+    backgroundColor: "#8b5cf6",
+    color: "#f5f5f5",
     padding: "10px 20px",
-    border: "none",
-    borderRadius: "5px",
+    border: "1px solid #2a2a2a",
+    borderRadius: "8px",
     cursor: "pointer",
     fontSize: "16px",
-    transition: "background-color 0.3s ease",
   }
 
   const buttonstyle = {
     padding: "10px 20px",
-    backgroundColor: "#007bff",
-    color: "white",
-    border: "none",
-    borderRadius: "5px",
+    backgroundColor: "#1f1f1f",
+    color: "#f5f5f5",
+    border: "1px solid #2a2a2a",
+    borderRadius: "8px",
     cursor: "pointer",
     fontSize: "16px",
-    transition: "background-color 0.3s ease",
   }
 
 
@@ -160,7 +158,7 @@ export function ForumMainPage() {
         style={{
           backgroundImage: backgroundImage ? `url(${backgroundImage})` : "none",
           width: "90%",
-          height: "500px",
+          height: "400px",
           backgroundSize: "cover",
           backgroundPosition: "center",
           position: "relative",
@@ -169,7 +167,7 @@ export function ForumMainPage() {
           alignItems: "end",
           margin: "0 auto",
           borderRadius: "10px",
-          marginTop:"60px"
+          marginTop:"110px"
         }}
       >
         <div style={{
@@ -185,17 +183,15 @@ export function ForumMainPage() {
              src={coverImage || ""}
             alt={game.name}
             style={{ 
-                borderRadius: "40px",
-                 width: "150px",height:"150px", 
+                borderRadius: "8px",
+                 width: "120px",height:"120px", 
                  objectFit:"cover",
-                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.5)" ,
-                  backgroundColor:"rgba(0,0,0,0.5)",
-                  padding:"10px"
-
+                 border:"1px solid #2a2a2a",
+                 backgroundColor:"#151515"
                 }}
           /> 
         )}
-        <p style={{ fontSize: "40px", color: "white",backgroundColor: "rgba(0, 0, 0, 0.5)", padding: "10px", borderRadius: "10px" }}>{game.name}</p>
+        <p style={{ fontSize: "32px", color: "#f5f5f5",backgroundColor: "rgba(10,10,10,0.7)", padding: "10px 16px", borderRadius: "8px" }}>{game.name}</p>
         </div>
       </div>
 
